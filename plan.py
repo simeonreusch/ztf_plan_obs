@@ -52,6 +52,7 @@ class ObservationPlan:
             self.now,
             brightness_shading=True,
             altitude_yaxis=True,
+            max_airmass=2.5,
         )
         ax.axvline(Time(self.now).plot_date, color="black", label="now", ls="dotted")
         if self.arrivaltime is not None:
@@ -62,7 +63,7 @@ class ObservationPlan:
                 ls="dotted",
             )
         plt.tight_layout()
-        plt.savefig("test.png")
+        plt.savefig(f"{self.name}_airmass.png")
 
 
 RA = 96.46
