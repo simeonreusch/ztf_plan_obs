@@ -20,6 +20,8 @@ from bs4 import BeautifulSoup
 
 
 class ObservationPlan:
+    """ """
+
     def __init__(
         self,
         ra: float,
@@ -49,6 +51,7 @@ class ObservationPlan:
         ]
 
     def plot_target(self):
+        """ """
         ax = plot_airmass(
             self.target,
             self.palomar,
@@ -68,7 +71,13 @@ class ObservationPlan:
         plt.tight_layout()
         plt.savefig(f"{self.name}_airmass.png")
 
+        # NOTE: INCLUDE MOON AND SUN IN THIS!
+
     def request_ztf_fields(self):
+        """
+        This looks at yupana.caltech.edu for the fields matching
+        your location and downloads the camera grid plots for these
+        """
         URL = "http://yupana.caltech.edu/cgi-bin/ptf/tb//zoc"
         IMAGE_URL_1 = "http://yupana.caltech.edu/marshals/tb//igmo_0_0.png"
         IMAGE_URL_2 = "http://yupana.caltech.edu/marshals/tb//igmo_0_1.png"
@@ -92,16 +101,12 @@ class ObservationPlan:
                 "submitshowobject": "SUBMIT (Show Object)",
             }
 
-            # Post the request
-            # response = requests.post(url=URL, data=request_data, timeout=30)
+            # Get information on fields from yupana.caltech.edu
             response = requests.get(URL, params=request_data)
-            img_data = requests.get(IMAGE_URL_1).content
-            with open("test.png", "wb") as handler:
-                handler.write(img_data)
 
+            # Parse the HTML response
             soup = BeautifulSoup(response.text, "html5lib")
 
-            # try:
             pre = soup.find_all("pre")[-1]
             results = pre.text.split("\n")[1:-3]
             fieldids = []
@@ -111,12 +116,26 @@ class ObservationPlan:
                     fieldids.append(fieldid)
                     fieldids_total.append(fieldid)
 
+            # Download the camera images (URLS are static, images
+            # seem to be regenerated after each request)
             for index, fieldid in enumerate(fieldids):
                 img_data = requests.get(IMAGE_URLS[index]).content
                 with open(f"grid_{fieldid}.png", "wb") as handler:
                     handler.write(img_data)
 
         print(f"Fields that are possible: {fieldids_total}")
+
+    def check_for_references(self):
+        """ """
+        print("Not implemented yet")
+
+    def check_galactic_latitude(self):
+        """ """
+        print("Not implemented yet")
+
+    def get_best_obstime(self):
+        """ """
+        print("Not implemented yet")
 
 
 # NEED TO INCLUDE ERROR CIRCLE CALCULATION
