@@ -1,2 +1,3 @@
 git+https://github.com/dlakaplan/ztf_tiling
 bs4
+ztfquery

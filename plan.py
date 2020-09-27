@@ -17,6 +17,7 @@ from datetime import datetime
 from astroplan.plots import plot_airmass, plot_altitude
 import requests
 from bs4 import BeautifulSoup
+from ztfquery import fields
 
 
 class ObservationPlan:
@@ -50,6 +51,9 @@ class ObservationPlan:
             ap.AtNightConstraint.twilight_astronomical(),
         ]
 
+        if not os.path.exists(self.name):
+            os.makedirs(self.name)
+
     def plot_target(self):
         """ """
         ax = plot_airmass(
@@ -69,7 +73,8 @@ class ObservationPlan:
                 ls="dotted",
             )
         plt.tight_layout()
-        plt.savefig(f"{self.name}_airmass.png")
+        outpath = os.path.join(self.name, f"{self.name}_airmass.png")
+        plt.savefig(outpath)
 
         # NOTE: INCLUDE MOON AND SUN IN THIS!
 
@@ -81,7 +86,9 @@ class ObservationPlan:
         URL = "http://yupana.caltech.edu/cgi-bin/ptf/tb//zoc"
         IMAGE_URL_1 = "http://yupana.caltech.edu/marshals/tb//igmo_0_0.png"
         IMAGE_URL_2 = "http://yupana.caltech.edu/marshals/tb//igmo_0_1.png"
-        IMAGE_URLS = [IMAGE_URL_1, IMAGE_URL_2]
+        IMAGE_URL_3 = "http://yupana.caltech.edu/marshals/tb//igmo_0_2.png"
+        IMAGE_URL_4 = "http://yupana.caltech.edu/marshals/tb//igmo_0_3.png"
+        IMAGE_URLS = [IMAGE_URL_1, IMAGE_URL_2, IMAGE_URL_3, IMAGE_URL_4]
 
         objra = self.ra
         objdec = self.dec
@@ -113,6 +120,7 @@ class ObservationPlan:
             for result in results:
                 if len(result) > 10:
                     fieldid = int(result[0:7])
+                    # print(fields.has_field_reference(fieldid))
                     fieldids.append(fieldid)
                     fieldids_total.append(fieldid)
 
@@ -120,14 +128,12 @@ class ObservationPlan:
             # seem to be regenerated after each request)
             for index, fieldid in enumerate(fieldids):
                 img_data = requests.get(IMAGE_URLS[index]).content
-                with open(f"grid_{fieldid}.png", "wb") as handler:
+                outpath = os.path.join(self.name, f"{self.name}_grid_{fieldid}.png")
+                with open(outpath, "wb") as handler:
                     handler.write(img_data)
 
         print(f"Fields that are possible: {fieldids_total}")
-
-    def check_for_references(self):
-        """ """
-        print("Not implemented yet")
+        print(f"Of these have a reference: ")
 
     def check_galactic_latitude(self):
         """ """
@@ -139,14 +145,12 @@ class ObservationPlan:
 
 
 # NEED TO INCLUDE ERROR CIRCLE CALCULATION
-# RA = 96.46
-# DEC = -4.33
-RA = 40
-DEC = 45
+RA = 96.46
+DEC = -4.33
 NAME = "IC200926A"
 ARRIVALTIME = "2020-09-26 07:54:11.621"
 
 plan = ObservationPlan(ra=RA, dec=DEC, name=NAME, arrivaltime=ARRIVALTIME)
 
-# plan.plot_target()
+plan.plot_target()
 plan.request_ztf_fields()
