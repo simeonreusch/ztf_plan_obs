@@ -18,6 +18,7 @@ from astroplan.plots import plot_airmass, plot_altitude
 import requests
 from bs4 import BeautifulSoup
 
+
 class ObservationPlan:
     def __init__(
         self,
@@ -67,7 +68,6 @@ class ObservationPlan:
         plt.tight_layout()
         plt.savefig(f"{self.name}_airmass.png")
 
-
     def request_ztf_fields(self):
         URL = "http://yupana.caltech.edu/cgi-bin/ptf/tb//zoc"
         IMAGE_URL_1 = "http://yupana.caltech.edu/marshals/tb//igmo_0_0.png"
@@ -83,26 +83,26 @@ class ObservationPlan:
         for grid in [1, 2]:
 
             request_data = {
-            "showobject": 1, 
-            "objra": objra,
-            "objdec": objdec,
-            "grid": grid,
-            "objname": "unknown",
-            "radam": radius,
-            "submitshowobject": "SUBMIT (Show Object)",
+                "showobject": 1,
+                "objra": objra,
+                "objdec": objdec,
+                "grid": grid,
+                "objname": "unknown",
+                "radam": radius,
+                "submitshowobject": "SUBMIT (Show Object)",
             }
 
             # Post the request
             # response = requests.post(url=URL, data=request_data, timeout=30)
             response = requests.get(URL, params=request_data)
             img_data = requests.get(IMAGE_URL_1).content
-            with open('test.png', 'wb') as handler:
+            with open("test.png", "wb") as handler:
                 handler.write(img_data)
 
-            soup = BeautifulSoup(response.text, 'html5lib')
+            soup = BeautifulSoup(response.text, "html5lib")
 
             # try:
-            pre = soup.find_all('pre')[-1]
+            pre = soup.find_all("pre")[-1]
             results = pre.text.split("\n")[1:-3]
             fieldids = []
             for result in results:
@@ -113,10 +113,11 @@ class ObservationPlan:
 
             for index, fieldid in enumerate(fieldids):
                 img_data = requests.get(IMAGE_URLS[index]).content
-                with open(f"grid_{fieldid}.png", 'wb') as handler:
+                with open(f"grid_{fieldid}.png", "wb") as handler:
                     handler.write(img_data)
-                    
+
         print(f"Fields that are possible: {fieldids_total}")
+
 
 # NEED TO INCLUDE ERROR CIRCLE CALCULATION
 # RA = 96.46
