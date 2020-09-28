@@ -132,10 +132,10 @@ class ObservationPlan:
 
         print("Recommended observation times:")
         print(
-            f"g-band: {self.g_band_recommended_time_start} --- {self.g_band_recommended_time_end}"
+            f"g-band: {self.time_shortener(self.g_band_recommended_time_start)} --- {self.time_shortener(self.g_band_recommended_time_end)}"
         )
         print(
-            f"r-band: {self.r_band_recommended_time_start} --- {self.r_band_recommended_time_end}"
+            f"r-band: {self.time_shortener(self.r_band_recommended_time_start)} --- {self.time_shortener(self.r_band_recommended_time_end)}"
         )
 
         if not os.path.exists(self.name):
@@ -186,7 +186,7 @@ class ObservationPlan:
         plt.text(
             start,
             0.8,
-            f"Recommended observation times:\n\ng-band: {str(self.g_band_recommended_time_start)[:-7]}:00 --- {str(self.g_band_recommended_time_end)[:-7]}:00\nr-band: {str(self.r_band_recommended_time_start)[:-7]}:00 --- {str(self.r_band_recommended_time_end)[:-7]}:00",
+            f"Recommended observation times:\n\ng-band: {self.time_shortener(self.g_band_recommended_time_start)} --- {self.time_shortener(self.g_band_recommended_time_end)}\nr-band: {self.time_shortener(self.r_band_recommended_time_start)} --- {self.time_shortener(self.r_band_recommended_time_end)}",
         )
 
         if self.date is not None:
@@ -295,6 +295,11 @@ class ObservationPlan:
     def get_best_obstime(self):
         """ """
         print("Not implemented yet")
+
+    @staticmethod
+    def time_shortener(time):
+        time_short = str(time)[:-7] + ":00"
+        return time_short
 
 
 # NEED TO INCLUDE ERROR CIRCLE CALCULATION
