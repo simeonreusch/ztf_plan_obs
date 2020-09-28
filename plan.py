@@ -25,18 +25,25 @@ class ObservationPlan:
 
     def __init__(
         self,
-        ra: float,
-        dec: float,
         name: str,
+        ra: float = None,
+        dec: float = None,
         arrivaltime: str = None,
         date: str = None,
         **kwargs,
     ):
 
-        self.ra = ra
-        self.dec = dec
+        # if ra is None:
+
         self.name = name
         self.arrivaltime = arrivaltime
+
+        if ra is None:
+            self.parse_gcn()
+        else:
+            self.ra = ra
+            self.dec = dec
+
         self.coordinates = SkyCoord(self.ra * u.deg, self.dec * u.deg, frame="icrs")
         self.target = ap.FixedTarget(name=self.name, coord=self.coordinates)
         self.palomar = Observer.at_site("Palomar", timezone="US/Pacific")
@@ -129,6 +136,21 @@ class ObservationPlan:
 
         if not os.path.exists(self.name):
             os.makedirs(self.name)
+
+    def parse_gcn(self):
+        """ """
+        URL = "https://gcn.gsfc.nasa.gov/amon_icecube_gold_bronze_events.html"
+        response = requests.get(URL)
+        table = pd.read_html(response.text)[0]
+        latest = table.head(1)
+        date = latest["EVENT"]["Date"][0].replace("/", "-")
+        obstime = latest["EVENT"]["Time UT"][0]
+        ra = latest["OBSERVATION"]["RA [deg]"][0]
+        dec = latest["OBSERVATION"]["Dec [deg]"][0]
+        arrivaltime = Time(f"20{date} {obstime}")
+        self.arrivaltime = arrivaltime
+        self.ra = ra
+        self.dec = dec
 
     def plot_target(self):
         """ """
@@ -272,13 +294,14 @@ class ObservationPlan:
 
 
 # NEED TO INCLUDE ERROR CIRCLE CALCULATION
-RA = 90.46
-DEC = -4.33
-NAME = "IC200926A"
-ARRIVALTIME = "2020-09-26 07:54:11.621"
-date = "2020-09-26"
+NAME = "IC200926B"
+# RA = 90.46
+# DEC = -4.33
+# ARRIVALTIME = "2020-09-26 07:54:11.621"
+# date = "2020-09-26"
 
-plan = ObservationPlan(ra=RA, dec=DEC, name=NAME, arrivaltime=ARRIVALTIME, date=date)
+plan = ObservationPlan(name=NAME)
+# ra=RA, dec=DEC, name=NAME, arrivaltime=ARRIVALTIME, date=date)
 
 plan.plot_target()
-# plan.request_ztf_fields()
+plan.request_ztf_fields()
