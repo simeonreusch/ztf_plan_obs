@@ -89,9 +89,13 @@ class ObservationPlan:
                 t_mjd > twilight_evening.mjd + 0.01
                 and t_mjd < twilight_morning.mjd - 0.01
             ):
-                indices_included.append(index)
-                airmasses_included.append(airmass[index])
-                times_included.append(times[index])
+                if airmass[index] < 2.5:
+                    indices_included.append(index)
+                    airmasses_included.append(airmass[index])
+                    times_included.append(times[index])
+
+        if len(airmasses_included) == 0:
+            raise Exception("No observation possible!")
 
         min_airmass = np.min(airmasses_included)
         min_airmass_index = np.argmin(airmasses_included)
@@ -294,14 +298,15 @@ class ObservationPlan:
 
 
 # NEED TO INCLUDE ERROR CIRCLE CALCULATION
-NAME = "IC200926B"
-# RA = 90.46
-# DEC = -4.33
-# ARRIVALTIME = "2020-09-26 07:54:11.621"
+NAME = "IC200926A"
+RA = 90.46
+DEC = -4.33
+ARRIVALTIME = "2020-09-26 07:54:11.621"
 # date = "2020-09-26"
 
-plan = ObservationPlan(name=NAME)
-# ra=RA, dec=DEC, name=NAME, arrivaltime=ARRIVALTIME, date=date)
+plan = ObservationPlan(
+    name=NAME, ra=RA, dec=DEC, arrivaltime=ARRIVALTIME
+)  # , date=date)
 
 plan.plot_target()
 plan.request_ztf_fields()
