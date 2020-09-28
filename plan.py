@@ -2,7 +2,7 @@
 # Author: Simeon Reusch (simeon.reusch@desy.de)
 # License: BSD-3-Clause
 
-import time, os
+import time, os, warnings
 import astropy
 from astropy.time import Time
 from astropy import units as u
@@ -29,6 +29,7 @@ class ObservationPlan:
         dec: float,
         name: str,
         arrivaltime: str = None,
+        date: str = None,
         **kwargs,
     ):
 
@@ -36,14 +37,11 @@ class ObservationPlan:
         self.dec = dec
         self.name = name
         self.arrivaltime = arrivaltime
-
         self.coordinates = SkyCoord(self.ra * u.deg, self.dec * u.deg, frame="icrs")
-
         self.target = ap.FixedTarget(name=self.name, coord=self.coordinates)
-
         self.palomar = Observer.at_site("Palomar", timezone="US/Pacific")
-
         self.now = Time(datetime.utcnow())
+        self.date = date
 
         constraints = [
             ap.AltitudeConstraint(20 * u.deg, 90 * u.deg),
@@ -56,10 +54,16 @@ class ObservationPlan:
 
     def plot_target(self):
         """ """
+        if self.date is not None:
+            _date = self.date + " 12:00:00.000000"
+            time = _date
+        else:
+            time = self.now
+
         ax = plot_airmass(
             self.target,
             self.palomar,
-            self.now,
+            time,
             brightness_shading=True,
             altitude_yaxis=False,
             max_airmass=2.5,
@@ -73,7 +77,15 @@ class ObservationPlan:
                 ls="dotted",
             )
         plt.tight_layout()
+
+        if self.date is not None:
+            ax.set_xlabel(f"{self.date} [UTC]")
+        else:
+            ax.set_xlabel(f"{self.now.datetime.date()} [UTC]")
         outpath = os.path.join(self.name, f"{self.name}_airmass.png")
+        plt.grid(True, color="green", linestyle="dotted", which="both")
+        start, end = ax.get_xlim()
+        ax.xaxis.set_ticks(np.arange(int(start), int(end), 1 / 12))
         plt.savefig(outpath)
 
         # NOTE: INCLUDE MOON AND SUN IN THIS!
@@ -95,6 +107,7 @@ class ObservationPlan:
         radius = 60
 
         fieldids_total = []
+        fieldids_total_ref = []
 
         for grid in [1, 2]:
 
@@ -117,23 +130,30 @@ class ObservationPlan:
             pre = soup.find_all("pre")[-1]
             results = pre.text.split("\n")[1:-3]
             fieldids = []
+            fieldids_ref = []
+
             for result in results:
                 if len(result) > 10:
                     fieldid = int(result[0:7])
-                    # print(fields.has_field_reference(fieldid))
                     fieldids.append(fieldid)
                     fieldids_total.append(fieldid)
+                    with warnings.catch_warnings():
+                        warnings.simplefilter("ignore")
+                        refs = fields.has_field_reference(fieldid)
+                    if refs["zg"] == True and refs["zr"] == True:
+                        fieldids_ref.append(fieldid)
+                        fieldids_total_ref.append(fieldid)
 
             # Download the camera images (URLS are static, images
             # seem to be regenerated after each request)
-            for index, fieldid in enumerate(fieldids):
+            for index, fieldid in enumerate(fieldids_ref):
                 img_data = requests.get(IMAGE_URLS[index]).content
                 outpath = os.path.join(self.name, f"{self.name}_grid_{fieldid}.png")
                 with open(outpath, "wb") as handler:
                     handler.write(img_data)
 
         print(f"Fields that are possible: {fieldids_total}")
-        print(f"Of these have a reference: ")
+        print(f"Of these have a reference: {fieldids_total_ref}")
 
     def check_galactic_latitude(self):
         """ """
@@ -149,8 +169,9 @@ RA = 96.46
 DEC = -4.33
 NAME = "IC200926A"
 ARRIVALTIME = "2020-09-26 07:54:11.621"
+date = "2020-09-26"
 
-plan = ObservationPlan(ra=RA, dec=DEC, name=NAME, arrivaltime=ARRIVALTIME)
+plan = ObservationPlan(ra=RA, dec=DEC, name=NAME, arrivaltime=ARRIVALTIME)  # date=date)
 
 plan.plot_target()
-plan.request_ztf_fields()
+# plan.request_ztf_fields()
