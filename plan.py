@@ -12,7 +12,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
 import astroplan as ap
-from astroplan import Observer
+from astroplan import Observer, is_observable
 from datetime import datetime
 from astroplan.plots import plot_airmass, plot_altitude
 import requests
@@ -43,11 +43,89 @@ class ObservationPlan:
         self.now = Time(datetime.utcnow())
         self.date = date
 
+        if self.date is not None:
+            self.start_obswindow = Time(self.date + " 00:00:00.000000")
+
+        else:
+            self.start_obswindow = Time(
+                str(self.now.datetime.date()) + " 00:00:00.000000"
+            )
+
+        self.end_obswindow = Time(self.start_obswindow.mjd + 1, format="mjd").iso
+
         constraints = [
             ap.AltitudeConstraint(20 * u.deg, 90 * u.deg),
-            ap.AirmassConstraint(5),
+            ap.AirmassConstraint(2.5),
             ap.AtNightConstraint.twilight_astronomical(),
         ]
+
+        times = Time(self.start_obswindow + np.linspace(0, 24, 1000) * u.hour)
+
+        airmass = self.palomar.altaz(times, self.target).secz
+        airmass = np.ma.array(airmass, mask=airmass < 1)
+        airmass = airmass.filled(fill_value=99)
+        airmass = [x.value for x in airmass]
+
+        twilight_evening = self.palomar.twilight_evening_astronomical(
+            Time(self.start_obswindow), which="next"
+        )
+        twilight_morning = self.palomar.twilight_morning_astronomical(
+            Time(self.start_obswindow), which="next"
+        )
+
+        indices_included = []
+        airmasses_included = []
+        times_included = []
+
+        for index, t_mjd in enumerate(times.mjd):
+            if (
+                t_mjd > twilight_evening.mjd + 0.01
+                and t_mjd < twilight_morning.mjd - 0.01
+            ):
+                indices_included.append(index)
+                airmasses_included.append(airmass[index])
+                times_included.append(times[index])
+
+        min_airmass = np.min(airmasses_included)
+        min_airmass_index = np.argmin(airmasses_included)
+        min_airmass_time = times_included[min_airmass_index]
+
+        distance_to_evening = min_airmass_time.mjd - twilight_evening.mjd
+        distance_to_morning = twilight_morning.mjd - min_airmass_time.mjd
+
+        print(f"Minimal airmass ({min_airmass:.2f}) at {min_airmass_time}")
+
+        if distance_to_morning < distance_to_evening:
+            self.g_band_recommended_time_start = (
+                min_airmass_time - 300 * u.s - 0.5 * u.hour
+            )
+            self.g_band_recommended_time_end = (
+                self.g_band_recommended_time_start + 300 * u.s
+            )
+            self.r_band_recommended_time_start = min_airmass_time - 300 * u.s
+            self.r_band_recommended_time_end = (
+                self.r_band_recommended_time_start + 300 * u.s
+            )
+
+        else:
+            self.g_band_recommended_time_start = (
+                min_airmass_time + 300 * u.s + 0.5 * u.hour
+            )
+            self.g_band_recommended_time_end = (
+                self.g_band_recommended_time_start + 300 * u.s
+            )
+            self.r_band_recommended_time_start = min_airmass_time + 300 * u.s
+            self.r_band_recommended_time_end = (
+                self.r_band_recommended_time_start + 300 * u.s
+            )
+
+        print("Recommended observation times:")
+        print(
+            f"g-band: {self.g_band_recommended_time_start} --- {self.g_band_recommended_time_end}"
+        )
+        print(
+            f"r-band: {self.r_band_recommended_time_start} --- {self.r_band_recommended_time_end}"
+        )
 
         if not os.path.exists(self.name):
             os.makedirs(self.name)
@@ -72,21 +150,50 @@ class ObservationPlan:
         if self.arrivaltime is not None:
             ax.axvline(
                 Time(self.arrivaltime).plot_date,
-                color="red",
+                color="indigo",
                 label="neutrino arrival",
                 ls="dotted",
             )
-        plt.tight_layout()
+
+        start, end = ax.get_xlim()
+
+        plt.text(
+            start,
+            0.8,
+            f"Recommended observation times:\n\ng-band: {str(self.g_band_recommended_time_start)[:-7]}:00 --- {str(self.g_band_recommended_time_end)[:-7]}:00\nr-band: {str(self.r_band_recommended_time_start)[:-7]}:00 --- {str(self.r_band_recommended_time_end)[:-7]}:00",
+        )
 
         if self.date is not None:
             ax.set_xlabel(f"{self.date} [UTC]")
         else:
             ax.set_xlabel(f"{self.now.datetime.date()} [UTC]")
-        outpath = os.path.join(self.name, f"{self.name}_airmass.png")
-        plt.grid(True, color="green", linestyle="dotted", which="both")
-        start, end = ax.get_xlim()
-        ax.xaxis.set_ticks(np.arange(int(start), int(end), 1 / 12))
-        plt.savefig(outpath)
+        plt.grid(True, color="brown", linestyle="dotted", which="both")
+
+        ax.axvspan(
+            self.g_band_recommended_time_start.plot_date,
+            self.g_band_recommended_time_end.plot_date,
+            alpha=0.5,
+            color="green",
+        )
+
+        ax.axvspan(
+            self.r_band_recommended_time_start.plot_date,
+            self.r_band_recommended_time_end.plot_date,
+            alpha=0.5,
+            color="red",
+        )
+
+        x = np.linspace(start + 0.03, end + 0.03, 9)
+
+        # Add recommended upper limit for airmass
+        y = np.full((len(x), 1), 2)
+        ax.errorbar(x, y, 0.05, color="red", uplims=True, fmt=" ")
+
+        plt.tight_layout()
+        outpath_png = os.path.join(self.name, f"{self.name}_airmass.png")
+        outpath_pdf = os.path.join(self.name, f"{self.name}_airmass.pdf")
+        plt.savefig(outpath_png)
+        plt.savefig(outpath_pdf)
 
         # NOTE: INCLUDE MOON AND SUN IN THIS!
 
@@ -165,13 +272,13 @@ class ObservationPlan:
 
 
 # NEED TO INCLUDE ERROR CIRCLE CALCULATION
-RA = 96.46
+RA = 90.46
 DEC = -4.33
 NAME = "IC200926A"
 ARRIVALTIME = "2020-09-26 07:54:11.621"
 date = "2020-09-26"
 
-plan = ObservationPlan(ra=RA, dec=DEC, name=NAME, arrivaltime=ARRIVALTIME)  # date=date)
+plan = ObservationPlan(ra=RA, dec=DEC, name=NAME, arrivaltime=ARRIVALTIME, date=date)
 
 plan.plot_target()
 # plan.request_ztf_fields()
