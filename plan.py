@@ -45,6 +45,8 @@ class ObservationPlan:
             self.dec = dec
 
         self.coordinates = SkyCoord(self.ra * u.deg, self.dec * u.deg, frame="icrs")
+        self.coordinates_galactic = self.coordinates.galactic
+        print(self.coordinates_galactic)
         self.target = ap.FixedTarget(name=self.name, coord=self.coordinates)
         self.palomar = Observer.at_site("Palomar", timezone="US/Pacific")
         self.now = Time(datetime.utcnow())
@@ -132,10 +134,10 @@ class ObservationPlan:
 
         print("Recommended observation times:")
         print(
-            f"g-band: {self.time_shortener(self.g_band_recommended_time_start)} --- {self.time_shortener(self.g_band_recommended_time_end)}"
+            f"g-band: {self.time_shortener(self.g_band_recommended_time_start)} - {self.time_shortener(self.g_band_recommended_time_end)} [UTC]"
         )
         print(
-            f"r-band: {self.time_shortener(self.r_band_recommended_time_start)} --- {self.time_shortener(self.r_band_recommended_time_end)}"
+            f"r-band: {self.time_shortener(self.r_band_recommended_time_start)} - {self.time_shortener(self.r_band_recommended_time_end)} [UTC]"
         )
 
         if not os.path.exists(self.name):
@@ -186,7 +188,7 @@ class ObservationPlan:
         plt.text(
             start,
             0.8,
-            f"Recommended observation times:\n\ng-band: {self.time_shortener(self.g_band_recommended_time_start)} --- {self.time_shortener(self.g_band_recommended_time_end)}\nr-band: {self.time_shortener(self.r_band_recommended_time_start)} --- {self.time_shortener(self.r_band_recommended_time_end)}",
+            f"Recommended observation times:\n\ng-band: {self.time_shortener(self.g_band_recommended_time_start)} --- {self.time_shortener(self.g_band_recommended_time_end)} [UTC]\n r-band: {self.time_shortener(self.r_band_recommended_time_start)} --- {self.time_shortener(self.r_band_recommended_time_end)} [UTC]",
         )
 
         if self.date is not None:
@@ -303,15 +305,17 @@ class ObservationPlan:
 
 
 # NEED TO INCLUDE ERROR CIRCLE CALCULATION
-NAME = "IC200926A"
-RA = 90.46
-DEC = -4.33
-ARRIVALTIME = "2020-09-26 07:54:11.621"
-# date = "2020-09-26"
+NAME = "IC200929A"
+# RA = 90.46
+# DEC = -4.33
+# ARRIVALTIME = "2020-09-26 07:54:11.621"
+date = "2020-09-30"
 
 plan = ObservationPlan(
-    name=NAME, ra=RA, dec=DEC, arrivaltime=ARRIVALTIME
-)  # , date=date)
+    name=NAME, date=date
+)  # , ra=RA, dec=DEC, arrivaltime=ARRIVALTIME
+
+# )  # , date=date)
 
 plan.plot_target()
 plan.request_ztf_fields()
