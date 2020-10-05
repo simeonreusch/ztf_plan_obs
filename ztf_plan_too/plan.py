@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 # Author: Simeon Reusch (simeon.reusch@desy.de)
+# GCN parsing code partially by Rober Stein (robert.stein@desy.de)
 # License: BSD-3-Clause
 
 import time, os, warnings
@@ -7,7 +8,7 @@ import astropy
 from astropy.time import Time
 from astropy import units as u
 from astropy.coordinates import SkyCoord, AltAz
-import os, time
+import os, time, re
 import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
@@ -33,13 +34,31 @@ class ObservationPlan:
         **kwargs,
     ):
 
-        # if ra is None:
-
         self.name = name
         self.arrivaltime = arrivaltime
+        self.ra_err = (None,)
+        self.dec_err = None
 
         if ra is None:
-            self.parse_gcn()
+            ra_notice, dec_notice = self.parse_latest_gcn_notice()
+            gcn_nr_latest = self.get_gcn_circulars_archive()[0][1]
+            ra_circ, ra_err_circ, dec_circ, dec_err_circ = self.parse_gcn_circular(
+                gcn_nr_latest
+            )
+            coords_notice = SkyCoord(
+                ra_notice * u.deg, dec_notice * u.deg, frame="icrs"
+            )
+            coords_circular = SkyCoord(ra_circ * u.deg, dec_circ * u.deg, frame="icrs")
+            separation = coords_notice.separation(coords_circular).deg
+            if separation < 1:
+                self.ra = ra_circ
+                self.dec = dec_circ
+                self.ra_err = ra_err_circ
+                self.dec_err = dec_err_circ
+            else:
+                self.ra = ra_notice
+                self.dec = dec_notice
+
         else:
             self.ra = ra
             self.dec = dec
@@ -50,11 +69,6 @@ class ObservationPlan:
         self.palomar = Observer.at_site("Palomar", timezone="US/Pacific")
         self.now = Time(datetime.utcnow())
         self.date = date
-        # if self.date is not None:
-        #     moon_coords = astropy.coordinates.get_moon(time=Time(self.date + " 00:00:00.000000"), location=self.palomar.location)
-        # else:
-        #     moon_coords = astropy.coordinates.get_moon(time=self.now, location=self.palomar.location)
-        # self.moon = ap.FixedTarget(name="moon", coord=moon_coords)
 
         if self.date is not None:
             self.start_obswindow = Time(self.date + " 00:00:00.000000")
@@ -159,10 +173,10 @@ class ObservationPlan:
         if not os.path.exists(self.name):
             os.makedirs(self.name)
 
-    def parse_gcn(self):
+    def parse_latest_gcn_notice(self):
         """ """
-        URL = "https://gcn.gsfc.nasa.gov/amon_icecube_gold_bronze_events.html"
-        response = requests.get(URL)
+        url = "https://gcn.gsfc.nasa.gov/amon_icecube_gold_bronze_events.html"
+        response = requests.get(url)
         table = pd.read_html(response.text)[0]
         latest = table.head(1)
         date = latest["EVENT"]["Date"][0].replace("/", "-")
@@ -171,8 +185,26 @@ class ObservationPlan:
         dec = latest["OBSERVATION"]["Dec [deg]"][0]
         arrivaltime = Time(f"20{date} {obstime}")
         self.arrivaltime = arrivaltime
-        self.ra = ra
-        self.dec = dec
+        return ra, dec
+
+    def parse_gcn_circular(self, gcn_number):
+        url = f"https://gcn.gsfc.nasa.gov/gcn3/{gcn_number}.gcn3"
+        response = requests.get(url)
+        splittext = response.text.splitlines()
+        for i, line in enumerate(splittext):
+            if ("RA" in line or "Ra" in line) and (
+                "DEC" in splittext[i + 1] or "Dec" in splittext[i + 1]
+            ):
+
+                ra, ra_upper, ra_lower = re.findall(r"[-+]?\d*\.\d+|\d+", line)[0:3]
+                dec, dec_upper, dec_lower = re.findall(
+                    r"[-+]?\d*\.\d+|\d+", splittext[i + 1]
+                )[0:3]
+                ra = float(ra)
+                dec = float(dec)
+                ra_err = float(max(ra_upper, ra_lower))
+                dec_err = float(max(dec_upper, dec_lower))
+                return ra, ra_err, dec, dec_err
 
     def plot_target(self):
         """ """
@@ -258,7 +290,6 @@ class ObservationPlan:
         )
 
         # And we annotate the separations
-
         for i, moonalt in enumerate(moon_altitudes):
             if moonalt > 20 and i % 3 == 0:
                 if moon_separations[i] < 20:
@@ -272,9 +303,6 @@ class ObservationPlan:
                     fontsize=6,
                     color=color,
                 )
-
-        # for i, xy in enumerate(zip(moon_times, moon_altitudes)):
-        #     ax.annotate(f"{moon_separations[i]:.0f}", xy=xy, textcoords='data')
 
         x = np.linspace(start + 0.03, end + 0.03, 9)
 
@@ -298,19 +326,14 @@ class ObservationPlan:
         plt.savefig(outpath_png, dpi=300, bbox_inches="tight")
         plt.savefig(outpath_pdf, bbox_inches="tight")
 
-        # NOTE: INCLUDE MOON AND SUN IN THIS!
-
     def request_ztf_fields(self):
         """
         This looks at yupana.caltech.edu for the fields matching
         your location and downloads the camera grid plots for these
         """
         URL = "http://yupana.caltech.edu/cgi-bin/ptf/tb//zoc"
-        IMAGE_URL_1 = "http://yupana.caltech.edu/marshals/tb//igmo_0_0.png"
-        IMAGE_URL_2 = "http://yupana.caltech.edu/marshals/tb//igmo_0_1.png"
-        IMAGE_URL_3 = "http://yupana.caltech.edu/marshals/tb//igmo_0_2.png"
-        IMAGE_URL_4 = "http://yupana.caltech.edu/marshals/tb//igmo_0_3.png"
-        IMAGE_URLS = [IMAGE_URL_1, IMAGE_URL_2, IMAGE_URL_3, IMAGE_URL_4]
+        image_url = "http://yupana.caltech.edu/marshals/tb//igmo_0_"
+        image_urls = [image_url + f"{x}.png" for x in [0, 1, 2, 3]]
 
         objra = self.ra
         objdec = self.dec
@@ -318,6 +341,10 @@ class ObservationPlan:
 
         fieldids_total = []
         fieldids_total_ref = []
+
+        if self.ra_err is not None:
+            radec_err = max(self.ra_err, self.dec_err)
+            radius = 60 * radec_err
 
         for grid in [1, 2]:
 
@@ -357,7 +384,7 @@ class ObservationPlan:
             # Download the camera images (URLS are static, images
             # seem to be regenerated after each request)
             for index, fieldid in enumerate(fieldids_ref):
-                img_data = requests.get(IMAGE_URLS[index]).content
+                img_data = requests.get(image_urls[index]).content
                 outpath = os.path.join(self.name, f"{self.name}_grid_{fieldid}.png")
                 with open(outpath, "wb") as handler:
                     handler.write(img_data)
@@ -365,13 +392,18 @@ class ObservationPlan:
         print(f"Fields that are possible: {fieldids_total}")
         print(f"Of these have a reference: {fieldids_total_ref}")
 
-    def check_galactic_latitude(self):
-        """ """
-        print("Not implemented yet")
+    def get_gcn_circulars_archive(self):
+        response = requests.get("https://gcn.gsfc.nasa.gov/gcn3_archive.html")
 
-    def get_best_obstime(self):
-        """ """
-        print("Not implemented yet")
+        gcns = []
+        for line in response.text.splitlines():
+            if "IceCube observation of a high-energy neutrino" in line:
+                res = line.split(">")
+                gcn_no = "".join([x for x in res[2] if x.isdigit()])
+                name = res[3].split(" - ")[0]
+                gcns.append((name, gcn_no))
+
+        return gcns
 
     @staticmethod
     def time_shortener(time):
@@ -391,19 +423,3 @@ class ObservationPlan:
             warnings.simplefilter("ignore")
             altitude = 1.0 / np.cos(np.radians(90 - airmass))
         return altitude
-
-
-# NEED TO INCLUDE ERROR CIRCLE CALCULATION
-NAME = "IC200929A"
-# RA = 90.46
-# DEC = -4.33
-# ARRIVALTIME = "2020-09-26 07:54:11.621"
-date = "2020-10-05"
-
-plan = ObservationPlan(name=NAME, date=date)
-# , ra=RA, dec=DEC, arrivaltime=ARRIVALTIME
-
-# )  # , date=date)
-
-plan.plot_target()
-# plan.request_ztf_fields()
