@@ -1,7 +1,7 @@
 DESCRIPTION = "Plan Too observation with ZTF"
 LONG_DESCRIPTION = """Plan Too observation with ZTF"""
 
-DISTNAME = "modelSED"
+DISTNAME = "ztf_plan_too"
 AUTHOR = "Simeon Reusch"
 MAINTAINER = "Simeon Reusch"
 MAINTAINER_EMAIL = "simeon.reusch@desy.de"
@@ -77,7 +77,7 @@ if __name__ == "__main__":
         print(packages)
     else:
         # This should be updated if new submodules are added
-        packages = ["modelSED"]
+        packages = ["ztf_plan_too"]
 
     setup(
         name=DISTNAME,
