@@ -89,10 +89,10 @@ class ObservationPlan:
         airmass = airmass.filled(fill_value=99)
         airmass = [x.value for x in airmass]
 
-        twilight_evening = self.palomar.twilight_evening_astronomical(
+        self.twilight_evening = self.palomar.twilight_evening_astronomical(
             Time(self.start_obswindow), which="next"
         )
-        twilight_morning = self.palomar.twilight_morning_astronomical(
+        self.twilight_morning = self.palomar.twilight_morning_astronomical(
             Time(self.start_obswindow), which="next"
         )
 
@@ -102,8 +102,8 @@ class ObservationPlan:
 
         for index, t_mjd in enumerate(times.mjd):
             if (
-                t_mjd > twilight_evening.mjd + 0.01
-                and t_mjd < twilight_morning.mjd - 0.01
+                t_mjd > self.twilight_evening.mjd + 0.01
+                and t_mjd < self.twilight_morning.mjd - 0.01
             ):
                 if airmass[index] < 2.5:
                     indices_included.append(index)
@@ -117,8 +117,8 @@ class ObservationPlan:
         min_airmass_index = np.argmin(airmasses_included)
         min_airmass_time = times_included[min_airmass_index]
 
-        distance_to_evening = min_airmass_time.mjd - twilight_evening.mjd
-        distance_to_morning = twilight_morning.mjd - min_airmass_time.mjd
+        distance_to_evening = min_airmass_time.mjd - self.twilight_evening.mjd
+        distance_to_morning = self.twilight_morning.mjd - min_airmass_time.mjd
 
         if distance_to_morning < distance_to_evening:
             self.g_band_recommended_time_start = (
@@ -186,8 +186,15 @@ class ObservationPlan:
             self.target,
             self.palomar,
             time,
-            brightness_shading=True,
+            # brightness_shading=True,
             min_altitude=10,
+        )
+
+        ax.axvspan(
+            self.twilight_evening.plot_date,
+            self.twilight_morning.plot_date,
+            alpha=0.2,
+            color="gray",
         )
 
         # Plot a vertical line for the current time
@@ -391,9 +398,9 @@ NAME = "IC200929A"
 # RA = 90.46
 # DEC = -4.33
 # ARRIVALTIME = "2020-09-26 07:54:11.621"
-# date = "2020-09-29"
+date = "2020-10-05"
 
-plan = ObservationPlan(name=NAME)  # , date=date
+plan = ObservationPlan(name=NAME, date=date)
 # , ra=RA, dec=DEC, arrivaltime=ARRIVALTIME
 
 # )  # , date=date)
