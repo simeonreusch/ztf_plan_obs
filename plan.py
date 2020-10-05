@@ -254,11 +254,16 @@ class ObservationPlan:
 
         for i, moonalt in enumerate(moon_altitudes):
             if moonalt > 20 and i % 3 == 0:
+                if moon_separations[i] < 20:
+                    color = "red"
+                else:
+                    color = "green"
                 ax.annotate(
                     f"{moon_separations[i]:.0f}",
                     xy=(moon_times[i], moonalt),
                     textcoords="data",
                     fontsize=6,
+                    color=color,
                 )
 
         # for i, xy in enumerate(zip(moon_times, moon_altitudes)):
