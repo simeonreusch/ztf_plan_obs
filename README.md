@@ -12,6 +12,8 @@ from ztf_plan_too.plan import ObservationPlan
 
 NAME = "IC200929A" # Name of the alert object
 date = "2020-10-05" #This is optional, defaults to today
+# you can also pass ra and dec values. If no values are given, it checks
+# the GCN archive
 
 plan = ObservationPlan(name=NAME, date=date)
 plan.plot_target() # Plots the observing conditions
