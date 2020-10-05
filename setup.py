@@ -56,6 +56,14 @@ def check_dependencies():
         import requests
     except ImportError:
         install_requires.append("requests")
+    try:
+        import lxml
+    except ImportError:
+        install_requires.append("lxml")
+    try:
+        import html5lib
+    except ImportError:
+        install_requires.append("html5lib")
 
     return install_requires
 
