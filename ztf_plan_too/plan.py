@@ -325,6 +325,7 @@ class ObservationPlan:
         outpath_pdf = os.path.join(self.name, f"{self.name}_airmass.pdf")
         plt.savefig(outpath_png, dpi=300, bbox_inches="tight")
         plt.savefig(outpath_pdf, bbox_inches="tight")
+        plt.close()
 
     def request_ztf_fields(self):
         """
