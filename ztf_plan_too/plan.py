@@ -162,7 +162,7 @@ class ObservationPlan:
         summarytext += f"Minimal airmass ({min_airmass:.2f}) at {min_airmass_time}\n"
         summarytext += "Separation from galactic plane:\n"
         summarytext += f"{self.coordinates_galactic.b.deg:.2f} deg\n\n"
-        summarytext += "Recommended observation times:"
+        summarytext += "Recommended observation times:\n"
         summarytext += f"g-band: {self.time_shortener(self.g_band_recommended_time_start)} - {self.time_shortener(self.g_band_recommended_time_end)} [UTC]\n"
         summarytext += f"r-band: {self.time_shortener(self.r_band_recommended_time_start)} - {self.time_shortener(self.r_band_recommended_time_end)} [UTC]\n"
 
