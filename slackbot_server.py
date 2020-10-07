@@ -7,7 +7,7 @@ import logging
 from flask import Flask
 from slack import WebClient
 from slackeventsapi import SlackEventAdapter
-from obsbot import ObsBot
+from slackbot import ObsBot
 
 app = Flask(__name__)
 
