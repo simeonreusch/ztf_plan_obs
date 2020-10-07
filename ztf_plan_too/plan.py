@@ -177,11 +177,10 @@ class ObservationPlan:
             self.r_band_recommended_time_end = (
                 self.r_band_recommended_time_start + 300 * u.s
             )
-
-        summarytext = f"RADEC = {self.coordinates.ra.deg} {self.coordinates.dec.deg}\n"
+        summarytext = f"Name = {self.name}\n\n"
+        summarytext += f"RADEC = {self.coordinates.ra.deg} {self.coordinates.dec.deg}\n"
         summarytext += f"Minimal airmass ({min_airmass:.2f}) at {min_airmass_time}\n"
-        summarytext += "Separation from galactic plane:\n"
-        summarytext += f"{self.coordinates_galactic.b.deg:.2f} deg\n\n"
+        summarytext += f"Separation from galactic plane: = {self.coordinates_galactic.b.deg:.2f} deg\n\n"
         summarytext += "Recommended observation times:\n"
         summarytext += f"g-band: {self.time_shortener(self.g_band_recommended_time_start)} - {self.time_shortener(self.g_band_recommended_time_end)} [UTC]\n"
         summarytext += f"r-band: {self.time_shortener(self.r_band_recommended_time_start)} - {self.time_shortener(self.r_band_recommended_time_end)} [UTC]\n"
