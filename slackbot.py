@@ -20,5 +20,4 @@ class ObsBot:
     def create_plot(self):
         plan = ObservationPlan(name=self.name, ra=self.ra, dec=self.dec, date=self.date)
         plan.plot_target()
-        summary = plan.get_summary()
-        return summary
+        self.summary = plan.get_summary()

@@ -39,25 +39,45 @@ class ObservationPlan:
         self.ra_err = (None,)
         self.dec_err = None
 
+        use_archival = False
+
         if ra is None:
-            ra_notice, dec_notice = self.parse_latest_gcn_notice()
-            gcn_nr_latest = self.get_gcn_circulars_archive()[0][1]
-            ra_circ, ra_err_circ, dec_circ, dec_err_circ = self.parse_gcn_circular(
-                gcn_nr_latest
-            )
-            coords_notice = SkyCoord(
-                ra_notice * u.deg, dec_notice * u.deg, frame="icrs"
-            )
-            coords_circular = SkyCoord(ra_circ * u.deg, dec_circ * u.deg, frame="icrs")
-            separation = coords_notice.separation(coords_circular).deg
-            if separation < 1:
-                self.ra = ra_circ
-                self.dec = dec_circ
-                self.ra_err = ra_err_circ
-                self.dec_err = dec_err_circ
+
+            # Check if request is archival:
+            archive = self.get_gcn_circulars_archive()
+            for archival_name, archival_number in archive:
+                if name == archival_name:
+                    gnc_nr = archival_number
+                    use_archival = True
+                    print("Archival data found, using these.")
+                    break
+
+            if use_archival:
+                self.ra, self.ra_err, self.dec, self.dec_err = self.parse_gcn_circular(
+                    archival_number
+                )
+
             else:
-                self.ra = ra_notice
-                self.dec = dec_notice
+                ra_notice, dec_notice = self.parse_latest_gcn_notice()
+                gcn_nr_latest = self.get_gcn_circulars_archive()[0][1]
+                ra_circ, ra_err_circ, dec_circ, dec_err_circ = self.parse_gcn_circular(
+                    gcn_nr_latest
+                )
+                coords_notice = SkyCoord(
+                    ra_notice * u.deg, dec_notice * u.deg, frame="icrs"
+                )
+                coords_circular = SkyCoord(
+                    ra_circ * u.deg, dec_circ * u.deg, frame="icrs"
+                )
+                separation = coords_notice.separation(coords_circular).deg
+                if separation < 1:
+                    self.ra = ra_circ
+                    self.dec = dec_circ
+                    self.ra_err = ra_err_circ
+                    self.dec_err = dec_err_circ
+                else:
+                    self.ra = ra_notice
+                    self.dec = dec_notice
 
         else:
             self.ra = ra
@@ -195,7 +215,6 @@ class ObservationPlan:
             if ("RA" in line or "Ra" in line) and (
                 "DEC" in splittext[i + 1] or "Dec" in splittext[i + 1]
             ):
-
                 ra, ra_upper, ra_lower = re.findall(r"[-+]?\d*\.\d+|\d+", line)[0:3]
                 dec, dec_upper, dec_lower = re.findall(
                     r"[-+]?\d*\.\d+|\d+", splittext[i + 1]
@@ -401,8 +420,11 @@ class ObservationPlan:
             if "IceCube observation of a high-energy neutrino" in line:
                 res = line.split(">")
                 gcn_no = "".join([x for x in res[2] if x.isdigit()])
-                name = res[3].split(" - ")[0]
-                gcns.append((name, gcn_no))
+                long_name = re.findall(
+                    r"(IceCube-[12][0-9][0-9][0-9][0-3][0-9][A-Z])", line
+                )[0]
+                short_name = "IC" + long_name[8:]
+                gcns.append((short_name, gcn_no))
 
         return gcns
 

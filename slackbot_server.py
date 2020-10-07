@@ -22,7 +22,7 @@ slack_web_client = WebClient(token=os.environ.get("SLACK_TOKEN"))
 def do_obs_plan(channel, name, ra=None, dec=None, date=None):
     """ """
     obs_bot = ObsBot(channel=channel, name=name, ra=ra, dec=dec, date=date)
-    plan = obs_bot.create_plot()
+    obs_bot.create_plot()
 
     imgpath = f"{name}/{name}_airmass.png"
     imgdata = open(imgpath, "rb")
@@ -30,7 +30,8 @@ def do_obs_plan(channel, name, ra=None, dec=None, date=None):
     slack_web_client.files_upload(file=imgdata, filename=imgpath, channels=channel)
     slack_web_client.chat_postMessage(
         channel=channel,
-        text=plan,
+        # text=obs_bot.summary,
+        text="lol",
     )
 
 
@@ -65,6 +66,8 @@ def message(payload):
             text = text.replace("*", "")
             split_text = text.split()
             name = split_text[1]
+            print(ts)
+            print(split_text)
 
             for i, parameter in enumerate(split_text):
                 if parameter in fuzzy_parameters(["ra", "RA", "Ra"]):
@@ -96,8 +99,8 @@ def message(payload):
 
 
 if __name__ == "__main__":
-    # logger = logging.getLogger()
-    # logger.setLevel(logging.DEBUG)
-    # logger.addHandler(logging.StreamHandler())
+    logger = logging.getLogger()
+    logger.setLevel(logging.DEBUG)
+    logger.addHandler(logging.StreamHandler())
 
     app.run(host="130.255.78.114", port=3000)
