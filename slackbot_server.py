@@ -30,8 +30,8 @@ def do_obs_plan(channel, name, ra=None, dec=None, date=None):
     slack_web_client.files_upload(file=imgdata, filename=imgpath, channels=channel)
     slack_web_client.chat_postMessage(
         channel=channel,
-        # text=obs_bot.summary,
-        text="lol",
+        text=obs_bot.summary,
+        # text="lol",
     )
 
 
@@ -57,17 +57,16 @@ def message(payload):
     if ts not in ts_old:
         ts_old.append(ts)
 
-        if "plan" in text.lower():
+        text = text.replace("*", "")
+        split_text = text.split()
+
+        if split_text[0] == "Plan" or split_text[0] == "plan":
             ra = None
             dec = None
             date = None
             radec_given = False
             channel_id = event.get("channel")
-            text = text.replace("*", "")
-            split_text = text.split()
             name = split_text[1]
-            print(ts)
-            print(split_text)
 
             for i, parameter in enumerate(split_text):
                 if parameter in fuzzy_parameters(["ra", "RA", "Ra"]):
