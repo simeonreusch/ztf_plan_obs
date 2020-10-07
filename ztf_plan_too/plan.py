@@ -157,21 +157,21 @@ class ObservationPlan:
             self.r_band_recommended_time_end = (
                 self.r_band_recommended_time_start + 300 * u.s
             )
-        print(f"RADEC = {self.coordinates.ra.deg} {self.coordinates.dec.deg}")
-        print(f"Minimal airmass ({min_airmass:.2f}) at {min_airmass_time}")
-        print("Separation from galactic plane:")
-        print(f"{self.coordinates_galactic.b.deg:.2f} deg")
 
-        print("Recommended observation times:")
-        print(
-            f"g-band: {self.time_shortener(self.g_band_recommended_time_start)} - {self.time_shortener(self.g_band_recommended_time_end)} [UTC]"
-        )
-        print(
-            f"r-band: {self.time_shortener(self.r_band_recommended_time_start)} - {self.time_shortener(self.r_band_recommended_time_end)} [UTC]"
-        )
+        summarytext = f"RADEC = {self.coordinates.ra.deg} {self.coordinates.dec.deg}\n"
+        summarytext += f"Minimal airmass ({min_airmass:.2f}) at {min_airmass_time}\n"
+        summarytext += "Separation from galactic plane:\n"
+        summarytext += f"{self.coordinates_galactic.b.deg:.2f} deg\n\n"
+        summarytext += "Recommended observation times:"
+        summarytext += f"g-band: {self.time_shortener(self.g_band_recommended_time_start)} - {self.time_shortener(self.g_band_recommended_time_end)} [UTC]\n"
+        summarytext += f"r-band: {self.time_shortener(self.r_band_recommended_time_start)} - {self.time_shortener(self.r_band_recommended_time_end)} [UTC]\n"
+
+        print(summarytext)
 
         if not os.path.exists(self.name):
             os.makedirs(self.name)
+
+        self.summarytext = summarytext
 
     def parse_latest_gcn_notice(self):
         """ """
@@ -405,6 +405,9 @@ class ObservationPlan:
                 gcns.append((name, gcn_no))
 
         return gcns
+
+    def get_summary(self):
+        return self.summarytext
 
     @staticmethod
     def time_shortener(time):
