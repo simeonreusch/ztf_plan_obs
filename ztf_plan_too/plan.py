@@ -178,12 +178,18 @@ class ObservationPlan:
                 self.r_band_recommended_time_start + 300 * u.s
             )
         summarytext = f"Name = {self.name}\n\n"
-        summarytext += f"RADEC = {self.coordinates.ra.deg} {self.coordinates.dec.deg}\n"
+
+        if self.ra_err is not None:
+            summarytext += f"RADEC = {self.coordinates.ra.deg} +/- {self.ra_err} {self.coordinates.dec.deg} +/- {self.dec_err}\n"
+        else:
+            summarytext += (
+                f"RADEC = {self.coordinates.ra.deg} {self.coordinates.dec.deg}\n"
+            )
         summarytext += f"Minimal airmass ({min_airmass:.2f}) at {min_airmass_time}\n"
         summarytext += f"Separation from galactic plane: = {self.coordinates_galactic.b.deg:.2f} deg\n\n"
         summarytext += "Recommended observation times:\n"
         summarytext += f"g-band: {self.time_shortener(self.g_band_recommended_time_start)} - {self.time_shortener(self.g_band_recommended_time_end)} [UTC]\n"
-        summarytext += f"r-band: {self.time_shortener(self.r_band_recommended_time_start)} - {self.time_shortener(self.r_band_recommended_time_end)} [UTC]\n"
+        summarytext += f"r-band:  {self.time_shortener(self.r_band_recommended_time_start)} - {self.time_shortener(self.r_band_recommended_time_end)} [UTC]\n"
 
         print(summarytext)
 
@@ -410,6 +416,8 @@ class ObservationPlan:
 
         print(f"Fields that are possible: {fieldids_total}")
         print(f"Of these have a reference: {fieldids_total_ref}")
+
+        return fieldids_total_ref
 
     def get_gcn_circulars_archive(self):
         response = requests.get("https://gcn.gsfc.nasa.gov/gcn3_archive.html")

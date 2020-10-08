@@ -31,7 +31,10 @@ def do_obs_plan(channel, name, ra=None, dec=None, date=None):
     slack_web_client.chat_postMessage(
         channel=channel,
         text=obs_bot.summary,
-        # text="lol",
+    )
+    slack_web_client.chat_postMessage(
+        channel=channel,
+        text=f"Available fields: {obs_bot.fields}",
     )
 
 

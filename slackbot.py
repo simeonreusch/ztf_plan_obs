@@ -21,3 +21,4 @@ class ObsBot:
         plan = ObservationPlan(name=self.name, ra=self.ra, dec=self.dec, date=self.date)
         plan.plot_target()
         self.summary = plan.get_summary()
+        self.fields = plan.request_ztf_fields()
