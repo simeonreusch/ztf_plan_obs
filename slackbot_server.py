@@ -44,8 +44,8 @@ def do_obs_plan(channel, name, ra=None, dec=None, date=None):
     # Post the ZTF grid plots
     for field in obs_bot.fields:
         imgpath = f"{name}/{name}_grid_{field}.png"
-        imgdata = open(imagpath, "rb")
-        slack_web_client.files_upload(file=imgpath, filename=imgdata, channels=channel)
+        imgdata = open(imgpath, "rb")
+        slack_web_client.files_upload(file=imgdata, filename=imgpath, channels=channel)
 
 
 def fuzzy_parameters(param_list):
@@ -72,6 +72,9 @@ def message(payload):
 
         text = text.replace("*", "")
         split_text = text.split()
+
+        if len(split_text) == 0:
+            return
 
         if split_text[0] == "Plan" or split_text[0] == "plan":
             ra = None
