@@ -36,7 +36,7 @@ class ObservationPlan:
 
         self.name = name
         self.arrivaltime = arrivaltime
-        self.ra_err = (None,)
+        self.ra_err = None
         self.dec_err = None
 
         use_archival = False
@@ -177,19 +177,19 @@ class ObservationPlan:
             self.r_band_recommended_time_end = (
                 self.r_band_recommended_time_start + 300 * u.s
             )
-        summarytext = f"Name = {self.name}\n\n"
+        summarytext = f"Name = IceCube-{self.name[2:]}\n"
 
         if self.ra_err is not None:
-            summarytext += f"RADEC = {self.coordinates.ra.deg} +/- {self.ra_err} {self.coordinates.dec.deg} +/- {self.dec_err}\n"
+            summarytext += f"RA = {self.coordinates.ra.deg} + {self.ra_err[0]} - {self.ra_err[1]}\nDec = {self.coordinates.dec.deg} + {self.dec_err[0]} - {self.dec_err[1]}\n"
         else:
             summarytext += (
                 f"RADEC = {self.coordinates.ra.deg} {self.coordinates.dec.deg}\n"
             )
         summarytext += f"Minimal airmass ({min_airmass:.2f}) at {min_airmass_time}\n"
-        summarytext += f"Separation from galactic plane: = {self.coordinates_galactic.b.deg:.2f} deg\n\n"
+        summarytext += f"Separation from galactic plane: = {self.coordinates_galactic.b.deg:.2f} deg\n"
         summarytext += "Recommended observation times:\n"
         summarytext += f"g-band: {self.time_shortener(self.g_band_recommended_time_start)} - {self.time_shortener(self.g_band_recommended_time_end)} [UTC]\n"
-        summarytext += f"r-band:  {self.time_shortener(self.r_band_recommended_time_start)} - {self.time_shortener(self.r_band_recommended_time_end)} [UTC]\n"
+        summarytext += f"r-band: {self.time_shortener(self.r_band_recommended_time_start)} - {self.time_shortener(self.r_band_recommended_time_end)} [UTC]"
 
         print(summarytext)
 
@@ -220,14 +220,10 @@ class ObservationPlan:
             if ("RA" in line or "Ra" in line) and (
                 "DEC" in splittext[i + 1] or "Dec" in splittext[i + 1]
             ):
-                ra, ra_upper, ra_lower = re.findall(r"[-+]?\d*\.\d+|\d+", line)[0:3]
-                dec, dec_upper, dec_lower = re.findall(
-                    r"[-+]?\d*\.\d+|\d+", splittext[i + 1]
-                )[0:3]
-                ra = float(ra)
-                dec = float(dec)
-                ra_err = float(max(ra_upper, ra_lower))
-                dec_err = float(max(dec_upper, dec_lower))
+                ra, ra_upper, ra_lower = self.parse_radec(line)
+                dec, dec_upper, dec_lower = self.parse_radec(splittext[i + 1])
+                ra_err = [ra_upper, ra_lower]
+                dec_err = [dec_upper, dec_lower]
                 return ra, ra_err, dec, dec_err
 
     def plot_target(self):
@@ -270,7 +266,9 @@ class ObservationPlan:
         plt.text(
             start,
             100,
-            f"RADEC = {self.coordinates.ra.deg} {self.coordinates.dec.deg}\nSeparation from Galactic Plane: {self.coordinates_galactic.b.deg:.2f} deg\nRecommended observation times:\ng-band: {self.time_shortener(self.g_band_recommended_time_start)} --- {self.time_shortener(self.g_band_recommended_time_end)} [UTC]\n r-band: {self.time_shortener(self.r_band_recommended_time_start)} --- {self.time_shortener(self.r_band_recommended_time_end)} [UTC]",
+            # f"RADEC = {self.coordinates.ra.deg} {self.coordinates.dec.deg}\nSeparation from Galactic Plane: {self.coordinates_galactic.b.deg:.2f} deg\nRecommended observation times:\ng-band: {self.time_shortener(self.g_band_recommended_time_start)} --- {self.time_shortener(self.g_band_recommended_time_end)} [UTC]\n r-band: {self.time_shortener(self.r_band_recommended_time_start)} --- {self.time_shortener(self.r_band_recommended_time_end)} [UTC]",
+            self.summarytext,
+            fontsize=8,
         )
 
         if self.date is not None:
@@ -368,7 +366,7 @@ class ObservationPlan:
         fieldids_total_ref = []
 
         if self.ra_err is not None:
-            radec_err = max(self.ra_err, self.dec_err)
+            radec_err = max(max(self.ra_err), max(self.dec_err))
             radius = 60 * radec_err
 
         for grid in [1, 2]:
@@ -456,3 +454,26 @@ class ObservationPlan:
             warnings.simplefilter("ignore")
             altitude = 1.0 / np.cos(np.radians(90 - airmass))
         return altitude
+
+    @staticmethod
+    def parse_radec(str):
+        regex_findall = re.findall(r"[-+]?\d*\.\d+|\d+", str)
+        if len(regex_findall) == 4:
+            pos = float(regex_findall[0])
+            pos_upper = float(regex_findall[1])
+            pos_lower = float(regex_findall[1])
+        elif len(regex_findall) == 5:
+            pos, pos_upper, pos_lower = regex_findall[0:3]
+            pos = float(pos)
+            pos_upper = float(pos_upper.replace("+", ""))
+            pos_lower = float(pos_lower.replace("-", ""))
+        else:
+            raise ParsingError(f"Could not parse GCN ra and dec")
+
+        return pos, pos_upper, pos_lower
+
+
+class ParsingError(Exception):
+    """Base class for parsing error"""
+
+    pass

@@ -24,10 +24,7 @@ def do_obs_plan(channel, name, ra=None, dec=None, date=None):
     obs_bot = ObsBot(channel=channel, name=name, ra=ra, dec=dec, date=date)
     obs_bot.create_plot()
 
-    imgpath = f"{name}/{name}_airmass.png"
-    imgdata = open(imgpath, "rb")
-
-    slack_web_client.files_upload(file=imgdata, filename=imgpath, channels=channel)
+    # Post a text summary
     slack_web_client.chat_postMessage(
         channel=channel,
         text=obs_bot.summary,
@@ -36,6 +33,19 @@ def do_obs_plan(channel, name, ra=None, dec=None, date=None):
         channel=channel,
         text=f"Available fields: {obs_bot.fields}",
     )
+
+    # Post the airmass plot
+    imgpath_plot = f"{name}/{name}_airmass.png"
+    imgdata_plot = open(imgpath_plot, "rb")
+    slack_web_client.files_upload(
+        file=imgdata_plot, filename=imgpath_plot, channels=channel
+    )
+
+    # Post the ZTF grid plots
+    for field in obs_bot.fields:
+        imgpath = f"{name}/{name}_grid_{field}.png"
+        imgdata = open(imagpath, "rb")
+        slack_web_client.files_upload(file=imgpath, filename=imgdata, channels=channel)
 
 
 def fuzzy_parameters(param_list):
