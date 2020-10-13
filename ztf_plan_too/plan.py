@@ -38,6 +38,7 @@ class ObservationPlan:
         self.arrivaltime = arrivaltime
         self.ra_err = None
         self.dec_err = None
+        self.warning = None
 
         use_archival = False
 
@@ -139,13 +140,13 @@ class ObservationPlan:
                 t_mjd > self.twilight_evening.mjd + 0.01
                 and t_mjd < self.twilight_morning.mjd - 0.01
             ):
-                if airmass[index] < 2.5:
+                if airmass[index] < 2.0:
                     indices_included.append(index)
                     airmasses_included.append(airmass[index])
                     times_included.append(times[index])
 
         if len(airmasses_included) == 0:
-            raise Exception("No observation possible!")
+            raise AirmassError("No observation due to airmass constraint!")
 
         min_airmass = np.min(airmasses_included)
         min_airmass_index = np.argmin(airmasses_included)
@@ -341,6 +342,22 @@ class ObservationPlan:
         ax2.set_yticks(airmass_ticks)
         ax2.set_ylabel("Airmass")
 
+        if self.warning:
+            plt.text(
+                0.6,
+                50,
+                "eggs",
+                size=50,
+                rotation=30.0,
+                ha="center",
+                va="center",
+                bbox=dict(
+                    boxstyle="round",
+                    ec=(1.0, 0.5, 0.5),
+                    fc=(1.0, 0.8, 0.8),
+                ),
+            )
+
         plt.tight_layout()
         plt.legend()
         outpath_png = os.path.join(self.name, f"{self.name}_airmass.png")
@@ -474,6 +491,12 @@ class ObservationPlan:
 
 
 class ParsingError(Exception):
+    """Base class for parsing error"""
+
+    pass
+
+
+class AirmassError(Exception):
     """Base class for parsing error"""
 
     pass

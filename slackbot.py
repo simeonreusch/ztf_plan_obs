@@ -3,6 +3,7 @@
 # License: BSD-3-Clause
 
 from ztf_plan_too.plan import ObservationPlan
+from ztf_plan_too.plan import AirmassError, ParsingError
 
 
 class ObsBot:
@@ -18,7 +19,15 @@ class ObsBot:
 
     # Craft and return the entire message payload as a dictionary.
     def create_plot(self):
-        plan = ObservationPlan(name=self.name, ra=self.ra, dec=self.dec, date=self.date)
-        plan.plot_target()
-        self.summary = plan.get_summary()
-        self.fields = plan.request_ztf_fields()
+        try:
+            plan = ObservationPlan(
+                name=self.name, ra=self.ra, dec=self.dec, date=self.date
+            )
+            plan.plot_target()
+            self.summary = plan.get_summary()
+            self.fields = plan.request_ztf_fields()
+        except AirmassError:
+            self.summary = "Not observable due to airmass constraint"
+            self.fields = None
+        except ParsingError:
+            self.summary = None
