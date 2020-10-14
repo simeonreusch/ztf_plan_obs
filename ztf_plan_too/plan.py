@@ -19,6 +19,7 @@ from astroplan.plots import plot_airmass, plot_altitude
 import requests
 from bs4 import BeautifulSoup
 from ztfquery import fields
+from ztf_plan_too import gcn_parser
 
 
 class ObservationPlan:
@@ -45,7 +46,7 @@ class ObservationPlan:
         if ra is None:
 
             # Check if request is archival:
-            archive = self.get_gcn_circulars_archive()
+            archive = gcn_parser.get_gcn_circulars_archive()
             for archival_name, archival_number in archive:
                 if name == archival_name:
                     gnc_nr = archival_number
@@ -54,16 +55,29 @@ class ObservationPlan:
                     break
 
             if use_archival:
-                self.ra, self.ra_err, self.dec, self.dec_err = self.parse_gcn_circular(
-                    archival_number
-                )
+                (
+                    self.ra,
+                    self.ra_err,
+                    self.dec,
+                    self.dec_err,
+                ) = gcn_parser.parse_gcn_circular(archival_number)
 
             else:
-                ra_notice, dec_notice = self.parse_latest_gcn_notice()
-                gcn_nr_latest = self.get_gcn_circulars_archive()[0][1]
-                ra_circ, ra_err_circ, dec_circ, dec_err_circ = self.parse_gcn_circular(
-                    gcn_nr_latest
+                print(
+                    "No archival data found (archive only stretches ~6 months back). Using newest notice!"
                 )
+                (
+                    ra_notice,
+                    dec_notice,
+                    self.arrivaltime,
+                ) = gcn_parser.parse_latest_gcn_notice()
+                gcn_nr_latest = archive[0][1]
+                (
+                    ra_circ,
+                    ra_err_circ,
+                    dec_circ,
+                    dec_err_circ,
+                ) = gcn_parser.parse_gcn_circular(gcn_nr_latest)
                 coords_notice = SkyCoord(
                     ra_notice * u.deg, dec_notice * u.deg, frame="icrs"
                 )
@@ -198,34 +212,6 @@ class ObservationPlan:
             os.makedirs(self.name)
 
         self.summarytext = summarytext
-
-    def parse_latest_gcn_notice(self):
-        """ """
-        url = "https://gcn.gsfc.nasa.gov/amon_icecube_gold_bronze_events.html"
-        response = requests.get(url)
-        table = pd.read_html(response.text)[0]
-        latest = table.head(1)
-        date = latest["EVENT"]["Date"][0].replace("/", "-")
-        obstime = latest["EVENT"]["Time UT"][0]
-        ra = latest["OBSERVATION"]["RA [deg]"][0]
-        dec = latest["OBSERVATION"]["Dec [deg]"][0]
-        arrivaltime = Time(f"20{date} {obstime}")
-        self.arrivaltime = arrivaltime
-        return ra, dec
-
-    def parse_gcn_circular(self, gcn_number):
-        url = f"https://gcn.gsfc.nasa.gov/gcn3/{gcn_number}.gcn3"
-        response = requests.get(url)
-        splittext = response.text.splitlines()
-        for i, line in enumerate(splittext):
-            if ("RA" in line or "Ra" in line) and (
-                "DEC" in splittext[i + 1] or "Dec" in splittext[i + 1]
-            ):
-                ra, ra_upper, ra_lower = self.parse_radec(line)
-                dec, dec_upper, dec_lower = self.parse_radec(splittext[i + 1])
-                ra_err = [ra_upper, ra_lower]
-                dec_err = [dec_upper, dec_lower]
-                return ra, ra_err, dec, dec_err
 
     def plot_target(self):
         """ """
@@ -434,22 +420,6 @@ class ObservationPlan:
 
         return fieldids_total_ref
 
-    def get_gcn_circulars_archive(self):
-        response = requests.get("https://gcn.gsfc.nasa.gov/gcn3_archive.html")
-
-        gcns = []
-        for line in response.text.splitlines():
-            if "IceCube observation of a high-energy neutrino" in line:
-                res = line.split(">")
-                gcn_no = "".join([x for x in res[2] if x.isdigit()])
-                long_name = re.findall(
-                    r"(IceCube-[12][0-9][0-9][0-9][0-3][0-9][A-Z])", line
-                )[0]
-                short_name = "IC" + long_name[8:]
-                gcns.append((short_name, gcn_no))
-
-        return gcns
-
     def get_summary(self):
         return self.summarytext
 
@@ -471,23 +441,6 @@ class ObservationPlan:
             warnings.simplefilter("ignore")
             altitude = 1.0 / np.cos(np.radians(90 - airmass))
         return altitude
-
-    @staticmethod
-    def parse_radec(str):
-        regex_findall = re.findall(r"[-+]?\d*\.\d+|\d+", str)
-        if len(regex_findall) == 4:
-            pos = float(regex_findall[0])
-            pos_upper = float(regex_findall[1])
-            pos_lower = float(regex_findall[1])
-        elif len(regex_findall) == 5:
-            pos, pos_upper, pos_lower = regex_findall[0:3]
-            pos = float(pos)
-            pos_upper = float(pos_upper.replace("+", ""))
-            pos_lower = float(pos_lower.replace("-", ""))
-        else:
-            raise ParsingError(f"Could not parse GCN ra and dec")
-
-        return pos, pos_upper, pos_lower
 
 
 class ParsingError(Exception):
