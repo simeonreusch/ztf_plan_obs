@@ -20,67 +20,10 @@ except ImportError:
     _has_setuptools = False
 
 
-def check_dependencies():
-    install_requires = []
-
-    # Make sure dependencies exist. This is ongoing
-    try:
-        import astropy
-    except ImportError:
-        install_requires.append("astropy")
-    try:
-        import numpy
-    except ImportError:
-        install_requires.append("numpy")
-    try:
-        import astroplan
-    except ImportError:
-        install_requires.append("astroplan")
-    try:
-        import pandas
-    except ImportError:
-        install_requires.append("pandas")
-    try:
-        import matplotlib
-    except ImportError:
-        install_requires.append("matplotlib")
-    try:
-        import bs4
-    except ImportError:
-        install_requires.append("bs4")
-    try:
-        import ztfquery
-    except ImportError:
-        install_requires.append("ztfquery")
-    try:
-        import requests
-    except ImportError:
-        install_requires.append("requests")
-    try:
-        import lxml
-    except ImportError:
-        install_requires.append("lxml")
-    try:
-        import html5lib
-    except ImportError:
-        install_requires.append("html5lib")
-
-    return install_requires
-
-
 if __name__ == "__main__":
 
-    # install_requires = check_dependencies()
-
-    # if _has_setuptools:
-    packages = find_packages()
-
-    # else:
-    #     # This should be updated if new submodules are added
-    #     packages = ["ztf_plan_obs"]
-
     install_requires = [
-        "astropy==4.0.1",
+        "astropy==4.0.0",
         "numpy",
         "astroplan",
         "pandas",

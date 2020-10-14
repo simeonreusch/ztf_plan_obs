@@ -17,8 +17,10 @@ dec = 13.37
 
 plan = ObservationPlan(name=name, date=date, ra=ra, dec=dec)
 plan.plot_target() # Plots the observing conditions
-plan.request_ztf_fields() # Checks in which ZTF fields this object is observable
+plan.request_ztf_fields() # Checks in which ZTF fields this object is observable and download plot for them from http://yupana.caltech.edu
 ```
+The observation plot and the ZTF field plots will be located in the current directory/[name]
+![](examples/figures/observation_plot_generic.png)
 
 Note: Checking if fields have references requires ztfquery, which needs IRSA credentials
 
@@ -32,5 +34,6 @@ date = "2020-10-08" #This is optional, defaults to today
 
 plan = ObservationPlan(name=name, date=date, alertsource="icecube")
 plan.plot_target() # Plots the observing conditions
-plan.request_ztf_fields() # Checks in which ZTF fields this object is observable
+plan.request_ztf_fields() # Checks in which ZTF fields this object is observable and download plot for them from http://yupana.caltech.edu
 ```
+![](examples/figures/observation_plot_icecube.png)
