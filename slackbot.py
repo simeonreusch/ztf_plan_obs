@@ -25,7 +25,10 @@ class ObsBot:
             )
             plan.plot_target()
             self.summary = plan.get_summary()
-            self.fields = plan.request_ztf_fields()
+            if self.observable is True:
+                self.fields = plan.request_ztf_fields()
+            else:
+                self.fields = None
         except ParsingError:
             self.summary = "GCN parsing error"
             self.fields = None
