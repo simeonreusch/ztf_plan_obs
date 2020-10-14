@@ -40,6 +40,7 @@ class ObservationPlan:
         self.ra_err = None
         self.dec_err = None
         self.warning = None
+        self.observable = True
 
         use_archival = False
 
@@ -160,38 +161,40 @@ class ObservationPlan:
                     times_included.append(times[index])
 
         if len(airmasses_included) == 0:
-            raise AirmassError("No observation due to airmass constraint!")
+            self.observable = False
+            # raise AirmassError("No observation due to airmass constraint!")
 
-        min_airmass = np.min(airmasses_included)
-        min_airmass_index = np.argmin(airmasses_included)
-        min_airmass_time = times_included[min_airmass_index]
+        if self.observable:
+            min_airmass = np.min(airmasses_included)
+            min_airmass_index = np.argmin(airmasses_included)
+            min_airmass_time = times_included[min_airmass_index]
 
-        distance_to_evening = min_airmass_time.mjd - self.twilight_evening.mjd
-        distance_to_morning = self.twilight_morning.mjd - min_airmass_time.mjd
+            distance_to_evening = min_airmass_time.mjd - self.twilight_evening.mjd
+            distance_to_morning = self.twilight_morning.mjd - min_airmass_time.mjd
 
-        if distance_to_morning < distance_to_evening:
-            self.g_band_recommended_time_start = (
-                min_airmass_time - 300 * u.s - 0.5 * u.hour
-            )
-            self.g_band_recommended_time_end = (
-                self.g_band_recommended_time_start + 300 * u.s
-            )
-            self.r_band_recommended_time_start = min_airmass_time - 300 * u.s
-            self.r_band_recommended_time_end = (
-                self.r_band_recommended_time_start + 300 * u.s
-            )
+            if distance_to_morning < distance_to_evening:
+                self.g_band_recommended_time_start = (
+                    min_airmass_time - 300 * u.s - 0.5 * u.hour
+                )
+                self.g_band_recommended_time_end = (
+                    self.g_band_recommended_time_start + 300 * u.s
+                )
+                self.r_band_recommended_time_start = min_airmass_time - 300 * u.s
+                self.r_band_recommended_time_end = (
+                    self.r_band_recommended_time_start + 300 * u.s
+                )
 
-        else:
-            self.g_band_recommended_time_start = (
-                min_airmass_time + 300 * u.s + 0.5 * u.hour
-            )
-            self.g_band_recommended_time_end = (
-                self.g_band_recommended_time_start + 300 * u.s
-            )
-            self.r_band_recommended_time_start = min_airmass_time + 300 * u.s
-            self.r_band_recommended_time_end = (
-                self.r_band_recommended_time_start + 300 * u.s
-            )
+            else:
+                self.g_band_recommended_time_start = (
+                    min_airmass_time + 300 * u.s + 0.5 * u.hour
+                )
+                self.g_band_recommended_time_end = (
+                    self.g_band_recommended_time_start + 300 * u.s
+                )
+                self.r_band_recommended_time_start = min_airmass_time + 300 * u.s
+                self.r_band_recommended_time_end = (
+                    self.r_band_recommended_time_start + 300 * u.s
+                )
         summarytext = f"Name = IceCube-{self.name[2:]}\n"
 
         if self.ra_err is not None:
@@ -200,11 +203,17 @@ class ObservationPlan:
             summarytext += (
                 f"RADEC = {self.coordinates.ra.deg} {self.coordinates.dec.deg}\n"
             )
-        summarytext += f"Minimal airmass ({min_airmass:.2f}) at {min_airmass_time}\n"
+
+        if self.observable:
+            summarytext += (
+                f"Minimal airmass ({min_airmass:.2f}) at {min_airmass_time}\n"
+            )
         summarytext += f"Separation from galactic plane: = {self.coordinates_galactic.b.deg:.2f} deg\n"
-        summarytext += "Recommended observation times:\n"
-        summarytext += f"g-band: {self.time_shortener(self.g_band_recommended_time_start)} - {self.time_shortener(self.g_band_recommended_time_end)} [UTC]\n"
-        summarytext += f"r-band: {self.time_shortener(self.r_band_recommended_time_start)} - {self.time_shortener(self.r_band_recommended_time_end)} [UTC]"
+
+        if self.observable:
+            summarytext += "Recommended observation times:\n"
+            summarytext += f"g-band: {self.time_shortener(self.g_band_recommended_time_start)} - {self.time_shortener(self.g_band_recommended_time_end)} [UTC]\n"
+            summarytext += f"r-band: {self.time_shortener(self.r_band_recommended_time_start)} - {self.time_shortener(self.r_band_recommended_time_end)} [UTC]"
 
         print(summarytext)
 
@@ -264,19 +273,20 @@ class ObservationPlan:
             ax.set_xlabel(f"{self.now.datetime.date()} [UTC]")
         plt.grid(True, color="gray", linestyle="dotted", which="both", alpha=0.5)
 
-        ax.axvspan(
-            self.g_band_recommended_time_start.plot_date,
-            self.g_band_recommended_time_end.plot_date,
-            alpha=0.5,
-            color="green",
-        )
+        if self.observable:
+            ax.axvspan(
+                self.g_band_recommended_time_start.plot_date,
+                self.g_band_recommended_time_end.plot_date,
+                alpha=0.5,
+                color="green",
+            )
 
-        ax.axvspan(
-            self.r_band_recommended_time_start.plot_date,
-            self.r_band_recommended_time_end.plot_date,
-            alpha=0.5,
-            color="red",
-        )
+            ax.axvspan(
+                self.r_band_recommended_time_start.plot_date,
+                self.r_band_recommended_time_end.plot_date,
+                alpha=0.5,
+                color="red",
+            )
 
         # Now we plot the moon altitudes and separation
         moon_altitudes = []
@@ -328,12 +338,12 @@ class ObservationPlan:
         ax2.set_yticks(airmass_ticks)
         ax2.set_ylabel("Airmass")
 
-        if self.warning:
+        if self.observable is False:
             plt.text(
-                0.6,
-                50,
-                "eggs",
-                size=50,
+                0.5,
+                0.5,
+                "NOT OBSERVABLE",
+                size=20,
                 rotation=30.0,
                 ha="center",
                 va="center",
@@ -342,6 +352,7 @@ class ObservationPlan:
                     ec=(1.0, 0.5, 0.5),
                     fc=(1.0, 0.8, 0.8),
                 ),
+                transform=ax.transAxes,
             )
 
         plt.tight_layout()

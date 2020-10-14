@@ -26,8 +26,6 @@ class ObsBot:
             plan.plot_target()
             self.summary = plan.get_summary()
             self.fields = plan.request_ztf_fields()
-        except AirmassError:
-            self.summary = "Not observable due to airmass constraint"
-            self.fields = None
         except ParsingError:
-            self.summary = None
+            self.summary = "GCN parsing error"
+            self.fields = None
