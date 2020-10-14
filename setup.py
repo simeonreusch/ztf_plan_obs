@@ -7,8 +7,8 @@ MAINTAINER = "Simeon Reusch"
 MAINTAINER_EMAIL = "simeon.reusch@desy.de"
 URL = "https://github.com/simeonreusch/ztf_plan_obs/"
 LICENSE = "BSD (3-clause)"
-DOWNLOAD_URL = "https://github.com/simeonreusch/ztf_plan_obs/archive/v0.21.tar.gz"
-VERSION = "v0.21"
+DOWNLOAD_URL = "https://github.com/simeonreusch/ztf_plan_obs/archive/v0.22.tar.gz"
+VERSION = "v0.22"
 
 try:
     from setuptools import setup, find_packages
@@ -70,14 +70,27 @@ def check_dependencies():
 
 if __name__ == "__main__":
 
-    install_requires = check_dependencies()
+    # install_requires = check_dependencies()
 
-    if _has_setuptools:
-        packages = find_packages()
-        print(packages)
-    else:
-        # This should be updated if new submodules are added
-        packages = ["ztf_plan_obs"]
+    # if _has_setuptools:
+    packages = find_packages()
+
+    # else:
+    #     # This should be updated if new submodules are added
+    #     packages = ["ztf_plan_obs"]
+
+    install_requires = [
+        "astropy",
+        "numpy",
+        "astroplan",
+        "pandas",
+        "matplotlib",
+        "bs4",
+        "ztfquery",
+        "requests",
+        "lxml",
+        "html5lib",
+    ]
 
     setup(
         name=DISTNAME,
