@@ -2,8 +2,8 @@
 # Author: Simeon Reusch (simeon.reusch@desy.de)
 # License: BSD-3-Clause
 
-from ztf_plan_too.plan import ObservationPlan
-from ztf_plan_too.plan import AirmassError, ParsingError
+from ztf_plan_obs.plan import ObservationPlan
+from ztf_plan_obs.plan import AirmassError, ParsingError
 
 
 class ObsBot:

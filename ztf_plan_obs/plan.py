@@ -19,7 +19,7 @@ from astroplan.plots import plot_airmass, plot_altitude
 import requests
 from bs4 import BeautifulSoup
 from ztfquery import fields
-from ztf_plan_too import gcn_parser
+from ztf_plan_obs import gcn_parser
 
 
 class ObservationPlan:

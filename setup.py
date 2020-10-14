@@ -1,14 +1,14 @@
-DESCRIPTION = "Plan Too observation with ZTF"
-LONG_DESCRIPTION = """Plan Too observation with ZTF"""
+DESCRIPTION = "Plan observation with ZTF"
+LONG_DESCRIPTION = """Plan observation with ZTF. Currently only neutrino alert parsing is implemented"""
 
-DISTNAME = "ztf_plan_too"
+DISTNAME = "ztf_plan_obs"
 AUTHOR = "Simeon Reusch"
 MAINTAINER = "Simeon Reusch"
 MAINTAINER_EMAIL = "simeon.reusch@desy.de"
-URL = "https://github.com/simeonreusch/ztf_plan_too/"
+URL = "https://github.com/simeonreusch/ztf_plan_obs/"
 LICENSE = "BSD (3-clause)"
-DOWNLOAD_URL = "https://github.com/simeonreusch/ztf_plan_too/archive/v0.1-alpha.tar.gz"
-VERSION = "v0.2-alpha"
+DOWNLOAD_URL = "https://github.com/simeonreusch/ztf_plan_obs/archive/v0.3-alpha.tar.gz"
+VERSION = "v0.3-alpha"
 
 try:
     from setuptools import setup, find_packages
@@ -77,7 +77,7 @@ if __name__ == "__main__":
         print(packages)
     else:
         # This should be updated if new submodules are added
-        packages = ["ztf_plan_too"]
+        packages = ["ztf_plan_obs"]
 
     setup(
         name=DISTNAME,
