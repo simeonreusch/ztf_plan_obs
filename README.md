@@ -1,10 +1,15 @@
 # ztf_plan_obs
 Toolset for planning observations with ZTF. GCN parsing is currently only implemented for IceCube alerts.
 
-# Installation
-Using Pip: ```pip3 install ztf_plan_obs```
+It checks if the object is observable with a maximum airmass on a given date, plots the airmass vs. time, computes two optimal (minimal airmass at night) observations of 300s in g- and r and downloads the ZTF field plots from [here](http://yupana.caltech.edu/cgi-bin/ptf/tb/zoc?begin) for all fields having a reference.
 
-Otherwise, you can clone the repository: ```git clone https://github.com/simeonreusch/ztf_plan_obs```
+# Requirements
+[ztfquery](https://github.com/mickaelrigault/ztfquery) for checking if fields have a reference.
+
+# Installation
+Using Pip: ```pip3 install ztf_plan_obs```.
+
+Otherwise, you can clone the repository: ```git clone https://github.com/simeonreusch/ztf_plan_obs```.
 
 # General usage
 ```python
@@ -22,7 +27,7 @@ plan.request_ztf_fields() # Checks in which ZTF fields this object is observable
 The observation plot and the ZTF field plots will be located in the current directory/[name]
 ![](examples/figures/observation_plot_generic.png)
 
-Note: Checking if fields have references requires ztfquery, which needs IRSA credentials
+Note: Checking if fields have references requires ztfquery, which needs IRSA credentials.
 
 # Usage for IceCube alerts
 ```python

@@ -34,6 +34,7 @@ class ObservationPlan:
         dec: float = None,
         arrivaltime: str = None,
         date: str = None,
+        max_airmass=2.0,
         alertsource: str = None,
         **kwargs,
     ):
@@ -41,6 +42,7 @@ class ObservationPlan:
         self.name = name
         self.arrivaltime = arrivaltime
         self.alertsource = alertsource
+        self.max_airmass = max_airmass
         self.ra_err = None
         self.dec_err = None
         self.warning = None
@@ -123,7 +125,7 @@ class ObservationPlan:
 
         constraints = [
             ap.AltitudeConstraint(20 * u.deg, 90 * u.deg),
-            ap.AirmassConstraint(2.5),
+            ap.AirmassConstraint(max_airmass),
             ap.AtNightConstraint.twilight_astronomical(),
         ]
 
