@@ -1,5 +1,5 @@
-DESCRIPTION = "Plan observation with ZTF"
-LONG_DESCRIPTION = """Plan observation with ZTF. Currently only neutrino alert parsing is implemented"""
+DESCRIPTION = "Plan observations with the Zwicky Transient Facility"
+LONG_DESCRIPTION = """Plan observations with the Zwicky Transient Facility. Automated parsing of GCN is only implemented for IceCube at the moment."""
 
 DISTNAME = "ztf_plan_obs"
 AUTHOR = "Simeon Reusch"
