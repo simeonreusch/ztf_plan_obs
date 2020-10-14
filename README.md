@@ -3,6 +3,8 @@ Toolset for planning observations with ZTF. GCN parsing is currently only implem
 
 It checks if the object is observable with a maximum airmass on a given date, plots the airmass vs. time, computes two optimal (minimal airmass at night) observations of 300s in g- and r and downloads the ZTF field plots from [here](http://yupana.caltech.edu/cgi-bin/ptf/tb/zoc?begin) for all fields having a reference.
 
+The output is designed so it can be directly pasted into the [GROWTH ToO Marshal](http://skipper.caltech.edu:8081/login?next=%2Fplan_manual) to schedule an observation.
+
 # Requirements
 [ztfquery](https://github.com/mickaelrigault/ztfquery) for checking if fields have a reference.
 
