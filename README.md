@@ -1,4 +1,4 @@
-# ztf_plan_too
+# ztf_plan_obs
 Toolset for planning observations with ZTF. Currently only parsing for IceCube neutrino alerts is implemented.
 
 # Installation
