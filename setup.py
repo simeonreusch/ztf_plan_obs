@@ -7,8 +7,8 @@ MAINTAINER = "Simeon Reusch"
 MAINTAINER_EMAIL = "simeon.reusch@desy.de"
 URL = "https://github.com/simeonreusch/ztf_plan_obs/"
 LICENSE = "BSD (3-clause)"
-DOWNLOAD_URL = "https://github.com/simeonreusch/ztf_plan_obs/archive/v0.3-alpha.tar.gz"
-VERSION = "v0.3-alpha"
+DOWNLOAD_URL = "https://github.com/simeonreusch/ztf_plan_obs/archive/v0.1.tar.gz"
+VERSION = "v0.1"
 
 try:
     from setuptools import setup, find_packages
