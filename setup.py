@@ -7,8 +7,8 @@ MAINTAINER = "Simeon Reusch"
 MAINTAINER_EMAIL = "simeon.reusch@desy.de"
 URL = "https://github.com/simeonreusch/ztf_plan_obs/"
 LICENSE = "BSD (3-clause)"
-DOWNLOAD_URL = "https://github.com/simeonreusch/ztf_plan_obs/archive/v0.22.tar.gz"
-VERSION = "v0.22"
+DOWNLOAD_URL = "https://github.com/simeonreusch/ztf_plan_obs/archive/v0.23.tar.gz"
+VERSION = "v0.23"
 
 try:
     from setuptools import setup, find_packages
@@ -27,7 +27,7 @@ def check_dependencies():
     try:
         import astropy
     except ImportError:
-        install_requires.append("astropy")
+        install_requires.append("astropy<4.0.2")
     try:
         import numpy
     except ImportError:
