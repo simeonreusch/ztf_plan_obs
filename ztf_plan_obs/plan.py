@@ -24,7 +24,7 @@ from ztf_plan_obs import gcn_parser
 icecube = ["IceCube", "IC", "icecube", "ICECUBE", "Icecube"]
 
 
-class ObservationPlan:
+class PlanObservation:
     """ """
 
     def __init__(

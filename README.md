@@ -13,7 +13,7 @@ Otherwise, you can clone the repository: ```git clone https://github.com/simeonr
 
 # General usage
 ```python
-from ztf_plan_obs.plan import ObservationPlan
+from ztf_plan_obs.plan import PlanObservation
 
 name = "testalert" # Name of the alert object
 date = "2020-05-05" #This is optional, defaults to today
@@ -31,7 +31,7 @@ Note: Checking if fields have references requires ztfquery, which needs IRSA cre
 
 # Usage for IceCube alerts
 ```python
-from ztf_plan_obs.plan import ObservationPlan
+from ztf_plan_obs.plan import PlanObservation
 
 name = "IC201007A" # Name of the alert object
 date = "2020-10-08" #This is optional, defaults to today

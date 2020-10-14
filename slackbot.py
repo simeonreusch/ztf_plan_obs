@@ -2,7 +2,7 @@
 # Author: Simeon Reusch (simeon.reusch@desy.de)
 # License: BSD-3-Clause
 
-from ztf_plan_obs.plan import ObservationPlan
+from ztf_plan_obs.plan import PlanObservation
 from ztf_plan_obs.plan import AirmassError, ParsingError
 
 
