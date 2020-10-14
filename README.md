@@ -1,14 +1,14 @@
 # ztf_plan_too
-Toolset for planning target of opportunity observations with ZTF
+Toolset for planning observations with ZTF. Currently only parsing for IceCube neutrino alerts is implemented.
 
 # Installation
-Using Pip: ```pip3 install git+https://github.com/simeonreusch/ztf_plan_too```
+Using Pip: ```pip3 install ztf_plan_obs```
 
-Otherwise, you can clone the repository: ```git clone https://github.com/simeonreusch/ztf_plan_too```
+Otherwise, you can clone the repository: ```git clone https://github.com/simeonreusch/ztf_plan_obs```
 
 # Usage
 ```python
-from ztf_plan_too.plan import ObservationPlan
+from ztf_plan_obs.plan import ObservationPlan
 
 NAME = "IC200929A" # Name of the alert object
 date = "2020-10-05" #This is optional, defaults to today
