@@ -21,6 +21,8 @@ from bs4 import BeautifulSoup
 from ztfquery import fields
 from ztf_plan_obs import gcn_parser
 
+icecube = ["IceCube", "IC", "icecube", "ICECUBE", "Icecube"]
+
 
 class ObservationPlan:
     """ """
@@ -32,11 +34,13 @@ class ObservationPlan:
         dec: float = None,
         arrivaltime: str = None,
         date: str = None,
+        alertsource: str = None,
         **kwargs,
     ):
 
         self.name = name
         self.arrivaltime = arrivaltime
+        self.alertsource = alertsource
         self.ra_err = None
         self.dec_err = None
         self.warning = None
@@ -44,7 +48,8 @@ class ObservationPlan:
 
         use_archival = False
 
-        if ra is None:
+        if ra is None and self.alertsource in icecube:
+            print("Parsing an IceCube alert")
 
             # Check if request is archival:
             archive = gcn_parser.get_gcn_circulars_archive()
@@ -195,7 +200,10 @@ class ObservationPlan:
                 self.r_band_recommended_time_end = (
                     self.r_band_recommended_time_start + 300 * u.s
                 )
-        summarytext = f"Name = IceCube-{self.name[2:]}\n"
+        if self.alertsource in icecube:
+            summarytext = f"Name = IceCube-{self.name[2:]}\n"
+        else:
+            summarytext = f"Name = {self.name}\n"
 
         if self.ra_err is not None:
             summarytext += f"RA = {self.coordinates.ra.deg} + {self.ra_err[0]} - {self.ra_err[1]}\nDec = {self.coordinates.dec.deg} + {self.dec_err[0]} - {self.dec_err[1]}\n"

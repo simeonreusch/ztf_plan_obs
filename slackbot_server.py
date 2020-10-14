@@ -19,9 +19,11 @@ slack_events_adapter = SlackEventAdapter(
 slack_web_client = WebClient(token=os.environ.get("SLACK_TOKEN"))
 
 
-def do_obs_plan(channel, name, ra=None, dec=None, date=None):
+def do_obs_plan(channel, name, ra=None, dec=None, date=None, alertsource=None):
     """ """
-    obs_bot = ObsBot(channel=channel, name=name, ra=ra, dec=dec, date=date)
+    obs_bot = ObsBot(
+        channel=channel, name=name, ra=ra, dec=dec, date=date, alertsource=alertsource
+    )
     obs_bot.create_plot()
 
     # Post a text summary
@@ -85,6 +87,7 @@ def message(payload):
             dec = None
             date = None
             radec_given = False
+            alertsource = None
             channel_id = event.get("channel")
             name = split_text[1]
 
@@ -109,12 +112,22 @@ def message(payload):
             else:
                 message = f"Hi there; creating your observability plot for *{name}*. You specified RA={ra} and Dec={dec}. One moment please."
 
+            if ra is None:
+                alertsource = "icecube"
+
             slack_web_client.chat_postMessage(
                 channel=channel_id,
                 text=message,
             )
 
-            do_obs_plan(channel=channel_id, name=name, ra=ra, dec=dec, date=date)
+            do_obs_plan(
+                channel=channel_id,
+                name=name,
+                ra=ra,
+                dec=dec,
+                date=date,
+                alertsource=alertsource,
+            )
 
 
 if __name__ == "__main__":
