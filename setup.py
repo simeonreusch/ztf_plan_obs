@@ -8,7 +8,7 @@ MAINTAINER_EMAIL = "simeon.reusch@desy.de"
 URL = "https://github.com/simeonreusch/ztf_plan_too/"
 LICENSE = "BSD (3-clause)"
 DOWNLOAD_URL = "https://github.com/simeonreusch/ztf_plan_too/archive/v0.1-alpha.tar.gz"
-VERSION = "v0.1-alpha"
+VERSION = "v0.2-alpha"
 
 try:
     from setuptools import setup, find_packages
