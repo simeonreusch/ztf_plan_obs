@@ -21,7 +21,7 @@ class ObsBot:
     # Craft and return the entire message payload as a dictionary.
     def create_plot(self):
         try:
-            plan = ObservationPlan(
+            plan = PlanObservation(
                 name=self.name,
                 ra=self.ra,
                 dec=self.dec,
