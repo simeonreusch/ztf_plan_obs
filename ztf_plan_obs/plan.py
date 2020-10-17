@@ -102,6 +102,16 @@ class PlanObservation:
                     self.ra = ra_notice
                     self.dec = dec_notice
 
+        elif ra is None and self.alertsource not in icecube:
+            if self.is_ztf_name(name):
+                from ztf_plan_obs.marshalconnector import MarshalInfo
+
+                m = MarshalInfo([name], nprocess=1)
+                self.ra = m.queryresult[0][0]
+                self.dec = m.queryresult[0][1]
+                print("\nFound ZTF object information on Marshal")
+            else:
+                raise ValueError("Please enter ra and dec")
         else:
             self.ra = ra
             self.dec = dec
@@ -443,6 +453,13 @@ class PlanObservation:
 
     def get_summary(self):
         return self.summarytext
+
+    @staticmethod
+    def is_ztf_name(name):
+        """
+        Checks if a string adheres to the ZTF naming scheme
+        """
+        return re.match("^ZTF[1-2]\d[a-z]{7}$", name)
 
     @staticmethod
     def time_shortener(time):
