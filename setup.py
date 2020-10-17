@@ -25,7 +25,7 @@ if __name__ == "__main__":
     install_requires = [
         "astropy",
         "numpy",
-        "astroplan>=0.7.dev1236",
+        "astroplan>=0.7.dev1245",
         "pandas",
         "matplotlib",
         "bs4",

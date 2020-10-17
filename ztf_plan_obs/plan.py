@@ -104,6 +104,7 @@ class PlanObservation:
 
         elif ra is None and self.alertsource not in icecube:
             if self.is_ztf_name(name):
+                print(f"{name} is a ZTF name. Looking in Marshal database for ra/dec")
                 from ztf_plan_obs.marshalconnector import MarshalInfo
 
                 m = MarshalInfo([name], nprocess=1)
@@ -179,7 +180,6 @@ class PlanObservation:
 
         if len(airmasses_included) == 0:
             self.observable = False
-            # raise AirmassError("No observation due to airmass constraint!")
 
         if self.observable:
             min_airmass = np.min(airmasses_included)
