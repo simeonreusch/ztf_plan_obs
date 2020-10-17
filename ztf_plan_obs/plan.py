@@ -103,7 +103,7 @@ class PlanObservation:
                     self.dec = dec_notice
 
         elif ra is None and self.alertsource not in icecube:
-            if self.is_ztf_name(name):
+            if is_ztf_name(name):
                 print(f"{name} is a ZTF name. Looking in Marshal database for ra/dec")
                 from ztf_plan_obs.marshalconnector import MarshalInfo
 
@@ -455,13 +455,6 @@ class PlanObservation:
         return self.summarytext
 
     @staticmethod
-    def is_ztf_name(name):
-        """
-        Checks if a string adheres to the ZTF naming scheme
-        """
-        return re.match("^ZTF[1-2]\d[a-z]{7}$", name)
-
-    @staticmethod
     def time_shortener(time):
         time_short = str(time)[:-7] + ":00"
         return time_short
@@ -479,6 +472,13 @@ class PlanObservation:
             warnings.simplefilter("ignore")
             altitude = 1.0 / np.cos(np.radians(90 - airmass))
         return altitude
+
+
+def is_ztf_name(name):
+    """
+    Checks if a string adheres to the ZTF naming scheme
+    """
+    return re.match("^ZTF[1-2]\d[a-z]{7}$", name)
 
 
 class ParsingError(Exception):
