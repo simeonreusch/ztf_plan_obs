@@ -2,8 +2,7 @@
 # Author: Simeon Reusch (simeon.reusch@desy.de)
 # License: BSD-3-Clause
 
-from ztf_plan_obs.plan import PlanObservation
-from ztf_plan_obs.plan import AirmassError, ParsingError
+from ztf_plan_obs.plan import PlanObservation, AirmassError, ParsingError, is_ztf_name
 
 
 class ObsBot:
@@ -16,12 +15,15 @@ class ObsBot:
         self.ra = ra
         self.dec = dec
         self.date = date
-        self.alertsource = alertsource
+        if is_ztf_name(self.name):
+            self.alertsource = None
+        else:
+            self.alertsource = alertsource
 
     # Craft and return the entire message payload as a dictionary.
     def create_plot(self):
         try:
-            plan = ObservationPlan(
+            plan = PlanObservation(
                 name=self.name,
                 ra=self.ra,
                 dec=self.dec,

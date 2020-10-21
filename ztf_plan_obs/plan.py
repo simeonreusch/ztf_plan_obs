@@ -102,6 +102,17 @@ class PlanObservation:
                     self.ra = ra_notice
                     self.dec = dec_notice
 
+        elif ra is None and self.alertsource not in icecube:
+            if is_ztf_name(name):
+                print(f"{name} is a ZTF name. Looking in Marshal database for ra/dec")
+                from ztf_plan_obs.marshalconnector import MarshalInfo
+
+                m = MarshalInfo([name], nprocess=1)
+                self.ra = m.queryresult[0][0]
+                self.dec = m.queryresult[0][1]
+                print("\nFound ZTF object information on Marshal")
+            else:
+                raise ValueError("Please enter ra and dec")
         else:
             self.ra = ra
             self.dec = dec
@@ -169,7 +180,6 @@ class PlanObservation:
 
         if len(airmasses_included) == 0:
             self.observable = False
-            # raise AirmassError("No observation due to airmass constraint!")
 
         if self.observable:
             min_airmass = np.min(airmasses_included)
@@ -462,6 +472,13 @@ class PlanObservation:
             warnings.simplefilter("ignore")
             altitude = 1.0 / np.cos(np.radians(90 - airmass))
         return altitude
+
+
+def is_ztf_name(name):
+    """
+    Checks if a string adheres to the ZTF naming scheme
+    """
+    return re.match("^ZTF[1-2]\d[a-z]{7}$", name)
 
 
 class ParsingError(Exception):
