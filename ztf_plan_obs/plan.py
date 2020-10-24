@@ -234,8 +234,17 @@ class PlanObservation:
 
         if self.observable:
             summarytext += "Recommended observation times:\n"
-            summarytext += f"g-band: {self.time_shortener(self.g_band_recommended_time_start)} - {self.time_shortener(self.g_band_recommended_time_end)} [UTC]\n"
-            summarytext += f"r-band: {self.time_shortener(self.r_band_recommended_time_start)} - {self.time_shortener(self.r_band_recommended_time_end)} [UTC]"
+
+            gbandtext = f"g-band: {self.time_shortener(self.g_band_recommended_time_start)} - {self.time_shortener(self.g_band_recommended_time_end)} [UTC]"
+            rbandtext = f"r-band: {self.time_shortener(self.r_band_recommended_time_start)} - {self.time_shortener(self.r_band_recommended_time_end)} [UTC]"
+
+            if self.g_band_recommended_time_start < self.r_band_recommended_time_start:
+                bandtexts = [gbandtext+"\n", rbandtext]
+            else:
+                bandtexts = [rbandtext+"\n", gbandtext]
+
+            for item in bandtexts:
+                summarytext += item
 
         print(summarytext)
 
