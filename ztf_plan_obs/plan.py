@@ -14,6 +14,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import astroplan as ap
 from astroplan import Observer, is_observable
+from astroplan.plots import plot_finder_image
 from datetime import datetime
 from astroplan.plots import plot_airmass, plot_altitude
 import requests
@@ -120,7 +121,8 @@ class PlanObservation:
         self.coordinates = SkyCoord(self.ra * u.deg, self.dec * u.deg, frame="icrs")
         self.coordinates_galactic = self.coordinates.galactic
         self.target = ap.FixedTarget(name=self.name, coord=self.coordinates)
-        self.palomar = Observer.at_site("Palomar", timezone="US/Pacific")
+        self.site = Observer.at_site("Palomar", timezone="US/Pacific")
+        #'Roque de los Muchachos'
         self.now = Time(datetime.utcnow())
         self.date = date
 
@@ -147,20 +149,20 @@ class PlanObservation:
 
         for time in moon_times:
             moon_coord = astropy.coordinates.get_moon(
-                time=time, location=self.palomar.location
+                time=time, location=self.site.location
             )
             moon_coords.append(moon_coord)
         self.moon = moon_coords
 
-        airmass = self.palomar.altaz(times, self.target).secz
+        airmass = self.site.altaz(times, self.target).secz
         airmass = np.ma.array(airmass, mask=airmass < 1)
         airmass = airmass.filled(fill_value=99)
         airmass = [x.value for x in airmass]
 
-        self.twilight_evening = self.palomar.twilight_evening_astronomical(
+        self.twilight_evening = self.site.twilight_evening_astronomical(
             Time(self.start_obswindow), which="next"
         )
-        self.twilight_morning = self.palomar.twilight_morning_astronomical(
+        self.twilight_morning = self.site.twilight_morning_astronomical(
             Time(self.start_obswindow), which="next"
         )
 
@@ -252,7 +254,7 @@ class PlanObservation:
 
         ax = plot_altitude(
             self.target,
-            self.palomar,
+            self.site,
             time,
             # brightness_shading=True,
             min_altitude=10,
@@ -314,7 +316,7 @@ class PlanObservation:
         moon_separations = []
         for moon in self.moon:
             moonalt = moon.transform_to(
-                AltAz(obstime=moon.obstime, location=self.palomar.location)
+                AltAz(obstime=moon.obstime, location=self.site.location)
             ).alt.deg
             moon_altitudes.append(moonalt)
             moon_times.append(moon.obstime.plot_date)
@@ -450,6 +452,15 @@ class PlanObservation:
         print(f"Of these have a reference: {fieldids_total_ref}")
 
         return fieldids_total_ref
+
+    def plot_finding_chart(self):
+        """ """
+        ax, hdu = plot_finder_image(
+            self.target, fov_radius=2 * u.arcmin, survey="DSS2 Blue", grid=True
+        )
+        outpath_png = os.path.join(self.name, f"{self.name}_finding_chart.png")
+        plt.savefig(outpath_png, dpi=300)
+        plt.close()
 
     def get_summary(self):
         return self.summarytext
