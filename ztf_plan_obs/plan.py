@@ -183,6 +183,9 @@ class PlanObservation:
         if len(airmasses_included) == 0:
             self.observable = False
 
+        if self.coordinates_galactic.b.deg < 10:
+            self.observable = False
+
         if self.observable:
             min_airmass = np.min(airmasses_included)
             min_airmass_index = np.argmin(airmasses_included)
@@ -239,9 +242,9 @@ class PlanObservation:
             rbandtext = f"r-band: {self.time_shortener(self.r_band_recommended_time_start)} - {self.time_shortener(self.r_band_recommended_time_end)} [UTC]"
 
             if self.g_band_recommended_time_start < self.r_band_recommended_time_start:
-                bandtexts = [gbandtext+"\n", rbandtext]
+                bandtexts = [gbandtext + "\n", rbandtext]
             else:
-                bandtexts = [rbandtext+"\n", gbandtext]
+                bandtexts = [rbandtext + "\n", gbandtext]
 
             for item in bandtexts:
                 summarytext += item
@@ -369,6 +372,8 @@ class PlanObservation:
         ax2.set_yticks(airmass_ticks)
         ax2.set_ylabel("Airmass")
 
+        plt.legend()
+
         if self.observable is False:
             plt.text(
                 0.5,
@@ -387,7 +392,7 @@ class PlanObservation:
             )
 
         plt.tight_layout()
-        plt.legend()
+
         outpath_png = os.path.join(self.name, f"{self.name}_airmass.png")
         outpath_pdf = os.path.join(self.name, f"{self.name}_airmass.pdf")
         plt.savefig(outpath_png, dpi=300, bbox_inches="tight")
@@ -465,7 +470,11 @@ class PlanObservation:
     def plot_finding_chart(self):
         """ """
         ax, hdu = plot_finder_image(
-            self.target, fov_radius=2 * u.arcmin, survey="DSS2 Blue", grid=True
+            self.target,
+            fov_radius=2 * u.arcmin,
+            survey="DSS2 Blue",
+            grid=True,
+            reticle=False,
         )
         outpath_png = os.path.join(self.name, f"{self.name}_finding_chart.png")
         plt.savefig(outpath_png, dpi=300)
