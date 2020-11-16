@@ -7,17 +7,16 @@ MAINTAINER = "Simeon Reusch"
 MAINTAINER_EMAIL = "simeon.reusch@desy.de"
 URL = "https://github.com/simeonreusch/ztf_plan_obs/"
 LICENSE = "BSD (3-clause)"
-DOWNLOAD_URL = "https://github.com/simeonreusch/ztf_plan_obs/archive/v0.26.tar.gz"
-VERSION = "v0.26"
+DOWNLOAD_URL = "https://github.com/simeonreusch/ztf_plan_obs/archive/v0.27.tar.gz"
+VERSION = "v0.27"
 
 try:
     from setuptools import setup, find_packages
 
-    _has_setuptools = True
 except ImportError:
     from distutils.core import setup
 
-    _has_setuptools = False
+    raise Exception("Please install python3 setuptools")
 
 
 if __name__ == "__main__":
@@ -48,7 +47,7 @@ if __name__ == "__main__":
         version=VERSION,
         download_url=DOWNLOAD_URL,
         install_requires=install_requires,
-        packages=None,
+        packages=find_packages(),
         classifiers=[
             "Intended Audience :: Science/Research",
             "Programming Language :: Python :: 3.8",
