@@ -118,9 +118,7 @@ def message(payload):
                 from ztf_plan_obs.plan import is_icecube_name
 
                 if not is_icecube_name(name):
-                    message = (
-                        f"When not giving radec, you have to provide an IceCube name."
-                    )
+                    message = f"When not giving radec, you have to provide an IceCube name (ICYYMMDD[A-Z])."
                     do_plan = False
 
             slack_web_client.chat_postMessage(
