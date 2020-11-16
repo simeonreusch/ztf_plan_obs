@@ -90,9 +90,10 @@ def parse_latest_gcn_notice():
     response = requests.get(url)
     table = pd.read_html(response.text)[0]
     latest = table.head(1)
+    revision = latest["EVENT"]["Rev"][0]
     date = latest["EVENT"]["Date"][0].replace("/", "-")
     obstime = latest["EVENT"]["Time UT"][0]
     ra = latest["OBSERVATION"]["RA [deg]"][0]
     dec = latest["OBSERVATION"]["Dec [deg]"][0]
     arrivaltime = Time(f"20{date} {obstime}")
-    return ra, dec, arrivaltime
+    return ra, dec, arrivaltime, revision

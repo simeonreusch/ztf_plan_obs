@@ -49,6 +49,7 @@ class PlanObservation:
         self.warning = None
         self.observable = True
         self.rejection_reason = None
+        self.datasource = None
 
         use_archival = False
 
@@ -58,9 +59,12 @@ class PlanObservation:
             # Check if request is archival:
             archive = gcn_parser.get_gcn_circulars_archive()
             for archival_name, archival_number in archive:
+                print(name)
+                print(archival_name)
                 if name == archival_name:
-                    gnc_nr = archival_number
+                    gcn_nr = archival_number
                     use_archival = True
+                    self.datasource = f"GCN Circular {gcn_nr}\n"
                     print("Archival data found, using these.")
                     break
 
@@ -74,12 +78,13 @@ class PlanObservation:
 
             else:
                 print(
-                    "No archival data found (archive only stretches ~6 months back). Using newest notice!"
+                    "No circular found (archive only stretches ~6 months back). Using newest notice!"
                 )
                 (
                     ra_notice,
                     dec_notice,
                     self.arrivaltime,
+                    revision,
                 ) = gcn_parser.parse_latest_gcn_notice()
                 gcn_nr_latest = archive[0][1]
                 gcn_info = gcn_parser.parse_gcn_circular(gcn_nr_latest)
@@ -99,9 +104,11 @@ class PlanObservation:
                     self.dec = dec_circ
                     self.ra_err = ra_err_circ
                     self.dec_err = dec_err_circ
+                    self.datasource = f"GCN Circular {gcn_nr_latest}\n"
                 else:
                     self.ra = ra_notice
                     self.dec = dec_notice
+                    self.datasource = f"GCN Notice (Rev. {revision})\n"
 
         elif ra is None and self.alertsource not in icecube:
             if is_ztf_name(name):
@@ -230,6 +237,9 @@ class PlanObservation:
             summarytext += (
                 f"RADEC = {self.coordinates.ra.deg} {self.coordinates.dec.deg}\n"
             )
+
+        if self.datasource is not None:
+            summarytext += f"Data source: {self.datasource}"
 
         if self.observable:
             summarytext += (
