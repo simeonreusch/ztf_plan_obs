@@ -4,6 +4,7 @@
 # License: BSD-3-Clause
 
 import os, time, re
+import numpy as np
 import pandas as pd
 from astropy.time import Time
 import requests
@@ -29,16 +30,41 @@ def get_gcn_circulars_archive():
 def parse_gcn_circular(gcn_number):
     url = f"https://gcn.gsfc.nasa.gov/gcn3/{gcn_number}.gcn3"
     response = requests.get(url)
+    returndict = {}
+    mainbody_starts_here = 999
     splittext = response.text.splitlines()
     for i, line in enumerate(splittext):
-        if ("RA" in line or "Ra" in line) and (
+        if "SUBJECT" in line:
+            name = line.split(" - ")[0].split(": ")[1]
+            returndict.update({"name": name})
+        elif "FROM" in line:
+            base = line.split("at")[0].split(": ")[1].split(" ")
+            author = [x for x in base if x != ""][1]
+            returndict.update({"author": author})
+        elif ("RA" in line or "Ra" in line) and (
             "DEC" in splittext[i + 1] or "Dec" in splittext[i + 1]
         ):
             ra, ra_upper, ra_lower = parse_radec(line)
             dec, dec_upper, dec_lower = parse_radec(splittext[i + 1])
-            ra_err = [ra_upper, ra_lower]
-            dec_err = [dec_upper, dec_lower]
-            return ra, ra_err, dec, dec_err
+            ra_err = [ra_upper, -ra_lower]
+            dec_err = [dec_upper, -dec_lower]
+            returndict.update(
+                {"ra": ra, "ra_err": ra_err, "dec": dec, "dec_err": dec_err}
+            )
+            mainbody_starts_here = i + 2
+        elif ("Time" in line or "TIME" in line) and i < mainbody_starts_here:
+            raw_time = [
+                x for x in line.split(" ") if x not in ["Time", "", "UT", "UTC"]
+            ][1]
+            raw_time = "".join(
+                [x for x in raw_time if np.logical_or(x.isdigit(), x in [":", "."])]
+            )
+            raw_date = name.split("-")[1][:6]
+            ut_time = f"20{raw_date[0:2]}-{raw_date[2:4]}-{raw_date[4:6]}T{raw_time}"
+            time = Time(ut_time, format="isot", scale="utc")
+            returndict.update({"time": time})
+
+    return returndict
 
 
 def parse_radec(str):
