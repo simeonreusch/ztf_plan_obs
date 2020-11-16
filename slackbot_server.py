@@ -83,6 +83,7 @@ def message(payload):
             return
 
         if split_text[0] == "Plan" or split_text[0] == "plan":
+            do_plan = True
             ra = None
             dec = None
             date = None
@@ -114,20 +115,28 @@ def message(payload):
 
             if ra is None:
                 alertsource = "icecube"
+                from ztf_plan_obs.plan import is_icecube_name
+
+                if not is_icecube_name(name):
+                    message = (
+                        f"When not giving radec, you have to provide an IceCube name."
+                    )
+                    do_plan = False
 
             slack_web_client.chat_postMessage(
                 channel=channel_id,
                 text=message,
             )
 
-            do_obs_plan(
-                channel=channel_id,
-                name=name,
-                ra=ra,
-                dec=dec,
-                date=date,
-                alertsource=alertsource,
-            )
+            if do_plan:
+                do_obs_plan(
+                    channel=channel_id,
+                    name=name,
+                    ra=ra,
+                    dec=dec,
+                    date=date,
+                    alertsource=alertsource,
+                )
 
 
 if __name__ == "__main__":
