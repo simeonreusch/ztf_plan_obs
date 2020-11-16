@@ -48,6 +48,7 @@ class PlanObservation:
         self.dec_err = None
         self.warning = None
         self.observable = True
+        self.rejection_reason = None
 
         use_archival = False
 
@@ -182,9 +183,11 @@ class PlanObservation:
 
         if len(airmasses_included) == 0:
             self.observable = False
+            self.rejection_reason = "airmass"
 
         if self.coordinates_galactic.b.deg < 10:
             self.observable = False
+            self.rejection_reason = "proximity to gal. plane"
 
         if self.observable:
             min_airmass = np.min(airmasses_included)
@@ -372,13 +375,14 @@ class PlanObservation:
         ax2.set_yticks(airmass_ticks)
         ax2.set_ylabel("Airmass")
 
-        plt.legend()
+        if self.observable:
+            plt.legend()
 
         if self.observable is False:
             plt.text(
                 0.5,
                 0.5,
-                "NOT OBSERVABLE",
+                f"NOT OBSERVABLE\ndue to {self.rejection_reason}",
                 size=20,
                 rotation=30.0,
                 ha="center",

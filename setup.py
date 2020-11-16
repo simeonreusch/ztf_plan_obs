@@ -7,8 +7,8 @@ MAINTAINER = "Simeon Reusch"
 MAINTAINER_EMAIL = "simeon.reusch@desy.de"
 URL = "https://github.com/simeonreusch/ztf_plan_obs/"
 LICENSE = "BSD (3-clause)"
-DOWNLOAD_URL = "https://github.com/simeonreusch/ztf_plan_obs/archive/v0.25.tar.gz"
-VERSION = "v0.25"
+DOWNLOAD_URL = "https://github.com/simeonreusch/ztf_plan_obs/archive/v0.26.tar.gz"
+VERSION = "v0.26"
 
 try:
     from setuptools import setup, find_packages
@@ -25,7 +25,7 @@ if __name__ == "__main__":
     install_requires = [
         "astropy",
         "numpy",
-        "astroplan>=0.7.dev1245",
+        "astroplan",
         "pandas",
         "matplotlib",
         "bs4",
