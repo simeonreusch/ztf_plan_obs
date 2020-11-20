@@ -28,6 +28,7 @@ if __name__ == "__main__":
         "pandas",
         "matplotlib",
         "bs4",
+        "flask",
         "ztfquery",
         "requests",
         "lxml",

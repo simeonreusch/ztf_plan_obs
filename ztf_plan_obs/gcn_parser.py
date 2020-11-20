@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # Author: Simeon Reusch (simeon.reusch@desy.de)
-# GCN parsing code partially by Rober Stein (robert.stein@desy.de)
+# GCN parsing code partially by Robert Stein (robert.stein@desy.de)
 # License: BSD-3-Clause
 
 import os, time, re
@@ -10,10 +10,16 @@ from astropy.time import Time
 import requests
 
 
-def get_gcn_circulars_archive():
-    response = requests.get("https://gcn.gsfc.nasa.gov/gcn3_archive.html")
+def get_gcn_circulars_archive(archive_no=None):
+    if archive_no is None:
+        response = requests.get("https://gcn.gsfc.nasa.gov/gcn3_archive.html")
+    else:
+        response = requests.get(
+            f"https://gcn.gsfc.nasa.gov/gcn3_arch_old{archive_no}.html"
+        )
 
     gcns = []
+    _archive_numbers = []
     for line in response.text.splitlines():
         if "IceCube observation of a high-energy neutrino" in line:
             res = line.split(">")
@@ -23,8 +29,15 @@ def get_gcn_circulars_archive():
             )[0]
             short_name = "IC" + long_name[8:]
             gcns.append((short_name, gcn_no))
+        elif "gcn3_arch_old" in line:
+            url = line.split('"')[1]
+            _archive_no = int(url[13:].split(".")[0])
+            _archive_numbers.append(_archive_no)
 
-    return gcns
+    if archive_no is not None:
+        print(f"Processed archive number {archive_no}")
+
+    return gcns, max(_archive_numbers)
 
 
 def parse_gcn_circular(gcn_number):
@@ -33,6 +46,7 @@ def parse_gcn_circular(gcn_number):
     returndict = {}
     mainbody_starts_here = 999
     splittext = response.text.splitlines()
+    splittext = list(filter(None, splittext))
     for i, line in enumerate(splittext):
         if "SUBJECT" in line:
             name = line.split(" - ")[0].split(": ")[1]
@@ -41,8 +55,10 @@ def parse_gcn_circular(gcn_number):
             base = line.split("at")[0].split(": ")[1].split(" ")
             author = [x for x in base if x != ""][1]
             returndict.update({"author": author})
-        elif ("RA" in line or "Ra" in line) and (
-            "DEC" in splittext[i + 1] or "Dec" in splittext[i + 1]
+        elif (
+            ("RA" in line or "Ra" in line)
+            and ("DEC" in splittext[i + 1] or "Dec" in splittext[i + 1])
+            and i < mainbody_starts_here
         ):
             ra, ra_upper, ra_lower = parse_radec(line)
             dec, dec_upper, dec_lower = parse_radec(splittext[i + 1])
@@ -69,6 +85,7 @@ def parse_gcn_circular(gcn_number):
 
 def parse_radec(str):
     regex_findall = re.findall(r"[-+]?\d*\.\d+|\d+", str)
+    print(regex_findall)
     if len(regex_findall) == 4:
         pos = float(regex_findall[0])
         pos_upper = float(regex_findall[1])
@@ -97,3 +114,7 @@ def parse_latest_gcn_notice():
     dec = latest["OBSERVATION"]["Dec [deg]"][0]
     arrivaltime = Time(f"20{date} {obstime}")
     return ra, dec, arrivaltime, revision
+
+
+class ParsingError(Exception):
+    pass

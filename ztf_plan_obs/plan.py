@@ -50,26 +50,40 @@ class PlanObservation:
         self.observable = True
         self.rejection_reason = None
         self.datasource = None
-
-        use_archival = False
+        self.found_in_archive = False
+        self.search_full_archive = False
 
         if ra is None and self.alertsource in icecube:
             print("Parsing an IceCube alert")
 
             # Check if request is archival:
-            archive = gcn_parser.get_gcn_circulars_archive()
-            for archival_name, archival_number in archive:
-                print(name)
-                print(archival_name)
-                if name == archival_name:
-                    gcn_nr = archival_number
-                    use_archival = True
-                    self.datasource = f"GCN Circular {gcn_nr}\n"
-                    print("Archival data found, using these.")
-                    break
+            archive, latest_archive_no = gcn_parser.get_gcn_circulars_archive()
 
-            if use_archival:
-                gcn_info = gcn_parser.parse_gcn_circular(archival_number)
+            # Check if the alert is younger than latest archive entry
+            archival_names = [entry[0] for entry in archive]
+            archival_dates = [int(entry[2:-1]) for entry in archival_names]
+            latest_archival = max(archival_dates)
+            this_alert_date = int(self.name[2:-1])
+            if this_alert_date > latest_archival:
+                print(
+                    "Alert too new, no GCN circular available yet. Using latest GCN notice"
+                )
+            else:
+                print("Alert info should be in GCN circular archive")
+                self.search_full_archive = True
+
+            if self.search_full_archive:
+                self.search_match_in_archive(archive)
+
+                # Well, if it's not in the latest archive, use the full
+                # backwards search
+                while self.found_in_archive is False:
+                    archive, _ = gcn_parser.get_gcn_circulars_archive(latest_archive_no)
+                    self.search_match_in_archive(archive)
+                    latest_archive_no -= 1
+
+            if self.found_in_archive:
+                gcn_info = gcn_parser.parse_gcn_circular(self.gcn_nr)
                 self.ra = gcn_info["ra"]
                 self.ra_err = gcn_info["ra_err"]
                 self.dec = gcn_info["dec"]
@@ -77,9 +91,7 @@ class PlanObservation:
                 self.arrivaltime = gcn_info["time"]
 
             else:
-                print(
-                    "No circular found (archive only stretches ~6 months back). Using newest notice!"
-                )
+                print("No archival GCN circular found. Using newest notice!")
                 (
                     ra_notice,
                     dec_notice,
@@ -411,6 +423,15 @@ class PlanObservation:
         plt.savefig(outpath_png, dpi=300, bbox_inches="tight")
         plt.savefig(outpath_pdf, bbox_inches="tight")
         plt.close()
+
+    def search_match_in_archive(self, archive):
+        """ """
+        for archival_name, archival_number in archive:
+            if self.name == archival_name:
+                self.gcn_nr = archival_number
+                self.found_in_archive = True
+                self.datasource = f"GCN Circular {self.gcn_nr}\n"
+                print("Archival data found, using these.")
 
     def request_ztf_fields(self):
         """
