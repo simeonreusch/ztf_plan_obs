@@ -85,7 +85,6 @@ def parse_gcn_circular(gcn_number):
 
 def parse_radec(str):
     regex_findall = re.findall(r"[-+]?\d*\.\d+|\d+", str)
-    print(regex_findall)
     if len(regex_findall) == 4:
         pos = float(regex_findall[0])
         pos_upper = float(regex_findall[1])
