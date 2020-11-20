@@ -11,7 +11,7 @@ The output is designed so it can be directly pasted into the [GROWTH ToO Marshal
 # Installation
 Using Pip: ```pip3 install ztf_plan_obs```.
 
-Otherwise, you can clone the repository: ```git clone https://github.com/simeonreusch/ztf_plan_obs```.
+Otherwise, you can clone the repository: ```git clone https://github.com/simeonreusch/ztf_plan_obs```. This also gives you access to the Slackbot.
 
 # General usage
 ```python
