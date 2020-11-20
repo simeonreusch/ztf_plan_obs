@@ -7,7 +7,8 @@ The output is designed so it can be directly pasted into the [GROWTH ToO Marshal
 
 # Requirements
 [ztfquery](https://github.com/mickaelrigault/ztfquery) for checking if fields have a reference.
-Requires at least Python 3.7
+
+ztf_plan_obs requires at least Python 3.7
 
 # Installation
 Using Pip: ```pip3 install ztf_plan_obs```.
