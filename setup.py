@@ -7,7 +7,7 @@ MAINTAINER = "Simeon Reusch"
 MAINTAINER_EMAIL = "simeon.reusch@desy.de"
 URL = "https://github.com/simeonreusch/ztf_plan_obs/"
 LICENSE = "BSD (3-clause)"
-DOWNLOAD_URL = "https://github.com/simeonreusch/ztf_plan_obs/archive/v0.28.tar.gz"
+DOWNLOAD_URL = "https://github.com/simeonreusch/ztf_plan_obs/archive/v0.29.tar.gz"
 VERSION = "0.29"
 
 try:
