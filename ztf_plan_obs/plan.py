@@ -36,7 +36,9 @@ class PlanObservation:
         arrivaltime: str = None,
         date: str = None,
         max_airmass=2.0,
+        observationlength: float = 300,
         alertsource: str = None,
+        verbose: bool = True,
         **kwargs,
     ):
 
@@ -44,6 +46,7 @@ class PlanObservation:
         self.arrivaltime = arrivaltime
         self.alertsource = alertsource
         self.max_airmass = max_airmass
+        self.observationlength = observationlength
         self.ra_err = None
         self.dec_err = None
         self.warning = None
@@ -54,7 +57,8 @@ class PlanObservation:
         self.search_full_archive = False
 
         if ra is None and self.alertsource in icecube:
-            print("Parsing an IceCube alert")
+            if verbose:
+                print("Parsing an IceCube alert")
 
             # Check if request is archival:
             archive, latest_archive_no = gcn_parser.get_gcn_circulars_archive()
@@ -65,11 +69,13 @@ class PlanObservation:
             latest_archival = max(archival_dates)
             this_alert_date = int(self.name[2:-1])
             if this_alert_date > latest_archival:
-                print(
-                    "Alert too new, no GCN circular available yet. Using latest GCN notice"
-                )
+                if verbose:
+                    print(
+                        "Alert too new, no GCN circular available yet. Using latest GCN notice"
+                    )
             else:
-                print("Alert info should be in GCN circular archive")
+                if verbose:
+                    print("Alert info should be in GCN circular archive")
                 self.search_full_archive = True
 
             if self.search_full_archive:
@@ -91,7 +97,8 @@ class PlanObservation:
                 self.arrivaltime = gcn_info["time"]
 
             else:
-                print("No archival GCN circular found. Using newest notice!")
+                if verbose:
+                    print("No archival GCN circular found. Using newest notice!")
                 (
                     ra_notice,
                     dec_notice,
@@ -217,26 +224,30 @@ class PlanObservation:
 
             if distance_to_morning < distance_to_evening:
                 self.g_band_recommended_time_start = (
-                    min_airmass_time - 300 * u.s - 0.5 * u.hour
+                    min_airmass_time - self.observationlength * u.s - 0.5 * u.hour
                 )
                 self.g_band_recommended_time_end = (
-                    self.g_band_recommended_time_start + 300 * u.s
+                    self.g_band_recommended_time_start + self.observationlength * u.s
                 )
-                self.r_band_recommended_time_start = min_airmass_time - 300 * u.s
+                self.r_band_recommended_time_start = (
+                    min_airmass_time - self.observationlength * u.s
+                )
                 self.r_band_recommended_time_end = (
-                    self.r_band_recommended_time_start + 300 * u.s
+                    self.r_band_recommended_time_start + self.observationlength * u.s
                 )
 
             else:
                 self.g_band_recommended_time_start = (
-                    min_airmass_time + 300 * u.s + 0.5 * u.hour
+                    min_airmass_time + self.observationlength * u.s + 0.5 * u.hour
                 )
                 self.g_band_recommended_time_end = (
-                    self.g_band_recommended_time_start + 300 * u.s
+                    self.g_band_recommended_time_start + self.observationlength * u.s
                 )
-                self.r_band_recommended_time_start = min_airmass_time + 300 * u.s
+                self.r_band_recommended_time_start = (
+                    min_airmass_time + self.observationlength * u.s
+                )
                 self.r_band_recommended_time_end = (
-                    self.r_band_recommended_time_start + 300 * u.s
+                    self.r_band_recommended_time_start + self.observationlength * u.s
                 )
         if self.alertsource in icecube:
             summarytext = f"Name = IceCube-{self.name[2:]}\n"
@@ -257,13 +268,13 @@ class PlanObservation:
             summarytext += (
                 f"Minimal airmass ({min_airmass:.2f}) at {min_airmass_time}\n"
             )
-        summarytext += f"Separation from galactic plane: = {self.coordinates_galactic.b.deg:.2f} deg\n"
+        summarytext += f"Separation from galactic plane: {self.coordinates_galactic.b.deg:.2f} deg\n"
 
         if self.observable:
             summarytext += "Recommended observation times:\n"
 
-            gbandtext = f"g-band: {self.time_shortener(self.g_band_recommended_time_start)} - {self.time_shortener(self.g_band_recommended_time_end)} [UTC]"
-            rbandtext = f"r-band: {self.time_shortener(self.r_band_recommended_time_start)} - {self.time_shortener(self.r_band_recommended_time_end)} [UTC]"
+            gbandtext = f"g-band: {time_shortener(self.g_band_recommended_time_start)} - {time_shortener(self.g_band_recommended_time_end)} [UTC]"
+            rbandtext = f"r-band: {time_shortener(self.r_band_recommended_time_start)} - {time_shortener(self.r_band_recommended_time_end)} [UTC]"
 
             if self.g_band_recommended_time_start < self.r_band_recommended_time_start:
                 bandtexts = [gbandtext + "\n", rbandtext]
@@ -273,7 +284,8 @@ class PlanObservation:
             for item in bandtexts:
                 summarytext += item
 
-        print(summarytext)
+        if verbose:
+            print(summarytext)
 
         if not os.path.exists(self.name):
             os.makedirs(self.name)
@@ -320,7 +332,6 @@ class PlanObservation:
         plt.text(
             start,
             100,
-            # f"RADEC = {self.coordinates.ra.deg} {self.coordinates.dec.deg}\nSeparation from Galactic Plane: {self.coordinates_galactic.b.deg:.2f} deg\nRecommended observation times:\ng-band: {self.time_shortener(self.g_band_recommended_time_start)} --- {self.time_shortener(self.g_band_recommended_time_end)} [UTC]\n r-band: {self.time_shortener(self.r_band_recommended_time_start)} --- {self.time_shortener(self.r_band_recommended_time_end)} [UTC]",
             self.summarytext,
             fontsize=8,
         )
@@ -422,7 +433,8 @@ class PlanObservation:
         outpath_pdf = os.path.join(self.name, f"{self.name}_airmass.pdf")
         plt.savefig(outpath_png, dpi=300, bbox_inches="tight")
         plt.savefig(outpath_pdf, bbox_inches="tight")
-        plt.close()
+        # plt.close()
+        return ax
 
     def search_match_in_archive(self, archive):
         """ """
@@ -518,11 +530,6 @@ class PlanObservation:
         return self.summarytext
 
     @staticmethod
-    def time_shortener(time):
-        time_short = str(time)[:-7] + ":00"
-        return time_short
-
-    @staticmethod
     def airmass_to_altitude(altitude):
         with warnings.catch_warnings():
             warnings.simplefilter("ignore")
@@ -553,6 +560,14 @@ def is_icecube_name(name):
         "^IC((\d{2}((0[13578]|1[02])(0[1-9]|[12]\d|3[01])|(0[13456789]|1[012])(0[1-9]|[12]\d|30)|02(0[1-9]|1\d|2[0-8])))|([02468][048]|[13579][26])0229)[a-zA-Z]$",
         name,
     )
+
+
+def time_shortener(time):
+    """
+    Better readable time
+    """
+    time_short = str(time)[:-7] + ":00"
+    return time_short
 
 
 class ParsingError(Exception):
