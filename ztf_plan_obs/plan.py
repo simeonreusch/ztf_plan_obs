@@ -37,6 +37,7 @@ class PlanObservation:
         date: str = None,
         max_airmass=2.0,
         observationlength: float = 300,
+        bands: list = ["g", "r"],
         alertsource: str = None,
         verbose: bool = True,
         **kwargs,
@@ -47,6 +48,7 @@ class PlanObservation:
         self.alertsource = alertsource
         self.max_airmass = max_airmass
         self.observationlength = observationlength
+        self.bands = bands
         self.ra_err = None
         self.dec_err = None
         self.warning = None
@@ -214,6 +216,11 @@ class PlanObservation:
             self.observable = False
             self.rejection_reason = "proximity to gal. plane"
 
+        self.g_band_recommended_time_start = None
+        self.g_band_recommended_time_end = None
+        self.r_band_recommended_time_start = None
+        self.r_band_recommended_time_end = None
+
         if self.observable:
             min_airmass = np.min(airmasses_included)
             min_airmass_index = np.argmin(airmasses_included)
@@ -223,32 +230,40 @@ class PlanObservation:
             distance_to_morning = self.twilight_morning.mjd - min_airmass_time.mjd
 
             if distance_to_morning < distance_to_evening:
-                self.g_band_recommended_time_start = (
-                    min_airmass_time - self.observationlength * u.s - 0.5 * u.hour
-                )
-                self.g_band_recommended_time_end = (
-                    self.g_band_recommended_time_start + self.observationlength * u.s
-                )
-                self.r_band_recommended_time_start = (
-                    min_airmass_time - self.observationlength * u.s
-                )
-                self.r_band_recommended_time_end = (
-                    self.r_band_recommended_time_start + self.observationlength * u.s
-                )
+                if "g" in self.bands:
+                    self.g_band_recommended_time_start = round_time(
+                        min_airmass_time - self.observationlength * u.s - 0.5 * u.hour
+                    )
+                    self.g_band_recommended_time_end = (
+                        self.g_band_recommended_time_start
+                        + self.observationlength * u.s
+                    )
+                if "r" in self.bands:
+                    self.r_band_recommended_time_start = round_time(
+                        min_airmass_time - self.observationlength * u.s
+                    )
+                    self.r_band_recommended_time_end = (
+                        self.r_band_recommended_time_start
+                        + self.observationlength * u.s
+                    )
 
             else:
-                self.g_band_recommended_time_start = (
-                    min_airmass_time + self.observationlength * u.s + 0.5 * u.hour
-                )
-                self.g_band_recommended_time_end = (
-                    self.g_band_recommended_time_start + self.observationlength * u.s
-                )
-                self.r_band_recommended_time_start = (
-                    min_airmass_time + self.observationlength * u.s
-                )
-                self.r_band_recommended_time_end = (
-                    self.r_band_recommended_time_start + self.observationlength * u.s
-                )
+                if "g" in self.bands:
+                    self.g_band_recommended_time_start = round_time(
+                        min_airmass_time + self.observationlength * u.s + 0.5 * u.hour
+                    )
+                    self.g_band_recommended_time_end = (
+                        self.g_band_recommended_time_start
+                        + self.observationlength * u.s
+                    )
+                if "r" in self.bands:
+                    self.r_band_recommended_time_start = round_time(
+                        min_airmass_time + self.observationlength * u.s
+                    )
+                    self.r_band_recommended_time_end = (
+                        self.r_band_recommended_time_start
+                        + self.observationlength * u.s
+                    )
         if self.alertsource in icecube:
             summarytext = f"Name = IceCube-{self.name[2:]}\n"
         else:
@@ -272,14 +287,29 @@ class PlanObservation:
 
         if self.observable:
             summarytext += "Recommended observation times:\n"
+            if "g" in self.bands:
+                gbandtext = f"g-band: {short_time(self.g_band_recommended_time_start)} - {short_time(self.g_band_recommended_time_end)} [UTC]"
+            if "r" in self.bands:
+                rbandtext = f"r-band: {short_time(self.r_band_recommended_time_start)} - {short_time(self.r_band_recommended_time_end)} [UTC]"
 
-            gbandtext = f"g-band: {time_shortener(self.g_band_recommended_time_start)} - {time_shortener(self.g_band_recommended_time_end)} [UTC]"
-            rbandtext = f"r-band: {time_shortener(self.r_band_recommended_time_start)} - {time_shortener(self.r_band_recommended_time_end)} [UTC]"
-
-            if self.g_band_recommended_time_start < self.r_band_recommended_time_start:
+            if (
+                "g" in bands
+                and "r" in bands
+                and self.g_band_recommended_time_start
+                < self.r_band_recommended_time_start
+            ):
                 bandtexts = [gbandtext + "\n", rbandtext]
-            else:
+            elif (
+                "g" in bands
+                and "r" in bands
+                and self.g_band_recommended_time_start
+                > self.r_band_recommended_time_start
+            ):
                 bandtexts = [rbandtext + "\n", gbandtext]
+            elif "g" in bands and "r" not in bands:
+                bandtexts = [gbandtext]
+            else:
+                bandtexts = [rbandtext]
 
             for item in bandtexts:
                 summarytext += item
@@ -343,19 +373,20 @@ class PlanObservation:
         plt.grid(True, color="gray", linestyle="dotted", which="both", alpha=0.5)
 
         if self.observable:
-            ax.axvspan(
-                self.g_band_recommended_time_start.plot_date,
-                self.g_band_recommended_time_end.plot_date,
-                alpha=0.5,
-                color="green",
-            )
-
-            ax.axvspan(
-                self.r_band_recommended_time_start.plot_date,
-                self.r_band_recommended_time_end.plot_date,
-                alpha=0.5,
-                color="red",
-            )
+            if "g" in self.bands:
+                ax.axvspan(
+                    self.g_band_recommended_time_start.plot_date,
+                    self.g_band_recommended_time_end.plot_date,
+                    alpha=0.5,
+                    color="green",
+                )
+            if "r" in self.bands:
+                ax.axvspan(
+                    self.r_band_recommended_time_start.plot_date,
+                    self.r_band_recommended_time_end.plot_date,
+                    alpha=0.5,
+                    color="red",
+                )
 
         # Now we plot the moon altitudes and separation
         moon_altitudes = []
@@ -562,12 +593,23 @@ def is_icecube_name(name):
     )
 
 
-def time_shortener(time):
+def round_time(time):
     """
-    Better readable time
+    Better readable time - round to next minute
     """
-    time_short = str(time)[:-7] + ":00"
-    return time_short
+    secs = float(str(time)[-6:])
+    if secs < 30:
+        time_rounded = time - secs * u.s
+    else:
+        time_rounded = time + (60 - secs) * u.s
+    return time_rounded
+
+
+def short_time(time):
+    """
+    Better readable time - remove subseconds
+    """
+    return str(time)[:-4]
 
 
 class ParsingError(Exception):
