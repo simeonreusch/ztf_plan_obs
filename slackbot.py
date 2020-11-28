@@ -15,10 +15,7 @@ class ObsBot:
         self.ra = ra
         self.dec = dec
         self.date = date
-        if is_ztf_name(self.name):
-            self.alertsource = None
-        else:
-            self.alertsource = alertsource
+        self.alertsource = alertsource
 
     # Craft and return the entire message payload as a dictionary.
     def create_plot(self):
