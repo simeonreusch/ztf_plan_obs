@@ -277,7 +277,7 @@ class PlanObservation:
         if self.ra_err is not None:
             summarytext += f"RA = {self.coordinates.ra.deg} + {self.ra_err[0]} - {self.ra_err[1]*-1}\nDec = {self.coordinates.dec.deg} + {self.dec_err[0]} - {self.dec_err[1]*-1}\n"
         else:
-            summarytext += f"RADEC = {self.coordinates.ra.deg:.7f} {self.coordinates.dec.deg:.7f}\n"
+            summarytext += f"RADEC = {self.coordinates.ra.deg:.8f} {self.coordinates.dec.deg:.8f}\n"
 
         if self.datasource is not None:
             summarytext += f"Data source: {self.datasource}"
@@ -467,7 +467,7 @@ class PlanObservation:
         outpath_pdf = os.path.join(self.name, f"{self.name}_airmass.pdf")
         plt.savefig(outpath_png, dpi=300, bbox_inches="tight")
         plt.savefig(outpath_pdf, bbox_inches="tight")
-        # plt.close()
+        plt.close()
         return ax
 
     def search_match_in_archive(self, archive):
