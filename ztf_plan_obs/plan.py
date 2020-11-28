@@ -141,6 +141,8 @@ class PlanObservation:
                 self.ra = fritz.queryresult["ra"]
                 self.dec = fritz.queryresult["dec"]
 
+                self.datasource = "Fritz"
+
                 print("\nFound ZTF object information on Fritz")
         elif ra is None:
             raise ValueError("Please enter ra and dec")
