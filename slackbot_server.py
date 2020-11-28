@@ -114,11 +114,16 @@ def message(payload):
                 message = f"Hi there; creating your observability plot for *{name}*. You specified RA={ra} and Dec={dec}. One moment please."
 
             if ra is None:
-                alertsource = "icecube"
-                from ztf_plan_obs.plan import is_icecube_name
+                from ztf_plan_obs.plan import is_icecube_name, is_ztf_name
 
-                if not is_icecube_name(name):
-                    message = f"When not giving radec, you have to provide an IceCube name (ICYYMMDD[A-Z])."
+                if is_icecube_name(name):
+                    alertsource = "icecube"
+
+                elif is_ztf_name(name):
+                    alertsource = "None"
+
+                else:
+                    message = f"When not giving radec, you have to provide an IceCube name (ICYYMMDD[A-Z]) or a ZTF name (ZTFYY[7*a-z])"
                     do_plan = False
 
             slack_web_client.chat_postMessage(
