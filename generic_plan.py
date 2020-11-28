@@ -7,6 +7,6 @@ date = "2020-11-29"  # This is optional, defaults to today
 # ra = 133.7
 # dec = 13.37
 
-plan = PlanObservation(name=name, date=date)
+plan = PlanObservation(name=name, date=date, alertsource="ztf")
 plan.plot_target()  # Plots the observing conditions
 plan.request_ztf_fields()  # Checks in which ZTF fields this object is observable

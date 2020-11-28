@@ -23,6 +23,7 @@ from ztfquery import fields
 from ztf_plan_obs import gcn_parser
 
 icecube = ["IceCube", "IC", "icecube", "ICECUBE", "Icecube"]
+ztf = ["ZTF", "ztf"]
 
 
 class PlanObservation:
@@ -131,7 +132,7 @@ class PlanObservation:
                     self.dec = dec_notice
                     self.datasource = f"GCN Notice (Rev. {revision})\n"
 
-        elif ra is None and self.alertsource not in icecube:
+        elif ra is None and self.alertsource in ztf:
             if is_ztf_name(name):
                 print(f"{name} is a ZTF name. Looking in Fritz database for ra/dec")
                 from ztf_plan_obs.fritzconnector import FritzInfo
@@ -141,8 +142,9 @@ class PlanObservation:
                 self.dec = fritz.queryresult["dec"]
 
                 print("\nFound ZTF object information on Fritz")
-            else:
-                raise ValueError("Please enter ra and dec")
+        elif ra is None:
+            raise ValueError("Please enter ra and dec")
+
         else:
             self.ra = ra
             self.dec = dec
@@ -488,7 +490,8 @@ class PlanObservation:
 
         objra = self.ra
         objdec = self.dec
-        radius = 60
+
+        radius = 0
 
         fieldids_total = []
         fieldids_total_ref = []

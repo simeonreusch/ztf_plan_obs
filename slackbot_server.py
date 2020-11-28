@@ -120,7 +120,7 @@ def message(payload):
                     alertsource = "icecube"
 
                 elif is_ztf_name(name):
-                    alertsource = "None"
+                    alertsource = "ztf"
 
                 else:
                     message = f"When not giving radec, you have to provide an IceCube name (ICYYMMDD[A-Z]) or a ZTF name (ZTFYY[7*a-z])"
