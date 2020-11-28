@@ -141,7 +141,7 @@ class PlanObservation:
                 self.ra = fritz.queryresult["ra"]
                 self.dec = fritz.queryresult["dec"]
 
-                self.datasource = "Fritz"
+                self.datasource = "Fritz\n"
 
                 print("\nFound ZTF object information on Fritz")
         elif ra is None:
@@ -277,9 +277,7 @@ class PlanObservation:
         if self.ra_err is not None:
             summarytext += f"RA = {self.coordinates.ra.deg} + {self.ra_err[0]} - {self.ra_err[1]*-1}\nDec = {self.coordinates.dec.deg} + {self.dec_err[0]} - {self.dec_err[1]*-1}\n"
         else:
-            summarytext += (
-                f"RADEC = {self.coordinates.ra.deg} {self.coordinates.dec.deg}\n"
-            )
+            summarytext += f"RADEC = {self.coordinates.ra.deg:.7f} {self.coordinates.dec.deg:.7f}\n"
 
         if self.datasource is not None:
             summarytext += f"Data source: {self.datasource}"
