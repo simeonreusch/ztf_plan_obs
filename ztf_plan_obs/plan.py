@@ -59,6 +59,8 @@ class PlanObservation:
         self.found_in_archive = False
         self.search_full_archive = False
 
+        print(self.alertsource)
+
         if ra is None and self.alertsource in icecube:
             if verbose:
                 print("Parsing an IceCube alert")
