@@ -116,6 +116,8 @@ def message(payload):
             if ra is None:
                 from ztf_plan_obs.plan import is_icecube_name, is_ztf_name
 
+                print(name)
+
                 if is_icecube_name(name):
                     alertsource = "icecube"
 
@@ -125,6 +127,8 @@ def message(payload):
                 else:
                     message = f"When not giving radec, you have to provide an IceCube name (ICYYMMDD[A-Z]) or a ZTF name (ZTFYY[7*a-z])"
                     do_plan = False
+
+                print(alertsource)
 
             slack_web_client.chat_postMessage(
                 channel=channel_id,
