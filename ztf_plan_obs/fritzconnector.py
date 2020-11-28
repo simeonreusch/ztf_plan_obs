@@ -5,6 +5,7 @@
 import multiprocessing
 import numpy as np
 from ztfquery import io
+from astropy.utils.console import ProgressBar
 
 MARSHAL_BASEURL = "http://skipper.caltech.edu:8080/cgi-bin/growth/view_avro.cgi?name="
 
@@ -13,6 +14,7 @@ class MarshalInfo:
     """ """
 
     def __init__(self, ztf_names, nprocess=16, logger=None):
+        print("LALALALALALLALA")
         import requests
         import pandas as pd
 
@@ -93,3 +95,42 @@ class MarshalInfo:
             dec_median = np.median(decs[ind])
 
         return ra_median, dec_median
+
+
+class FritzInfo:
+    """ Testing only """
+
+    def __init__(self, ztf_names):
+        self.ztf_names = ztf_names
+
+        self.queryresult = self.get_info()
+
+    def get_info(self):
+        from ztfquery import fritz
+
+        returndict = {}
+
+        object_count = len(self.ztf_names)
+        bar = ProgressBar(object_count)
+
+        queryresult = []
+
+        for i, name in enumerate(self.ztf_names):
+            query_res = fritz.download_alerts(name)
+            queryresult.append(query_res)
+            bar.update(i)
+
+        bar.update(object_count)
+
+        ras = []
+        decs = []
+
+        for entry in queryresult[0]:
+            ras.append(entry["candidate"]["ra"])
+            decs.append(entry["candidate"]["dec"])
+
+        ra = np.median(ras)
+        dec = np.median(decs)
+
+        returndict.update({"ra": ra, "dec": dec})
+        return returndict

@@ -133,13 +133,14 @@ class PlanObservation:
 
         elif ra is None and self.alertsource not in icecube:
             if is_ztf_name(name):
-                print(f"{name} is a ZTF name. Looking in Marshal database for ra/dec")
-                from ztf_plan_obs.marshalconnector import MarshalInfo
+                print(f"{name} is a ZTF name. Looking in Fritz database for ra/dec")
+                from ztf_plan_obs.fritzconnector import FritzInfo
 
-                m = MarshalInfo([name], nprocess=1)
-                self.ra = m.queryresult[0][0]
-                self.dec = m.queryresult[0][1]
-                print("\nFound ZTF object information on Marshal")
+                fritz = FritzInfo([name])
+                self.ra = fritz.queryresult["ra"]
+                self.dec = fritz.queryresult["dec"]
+
+                print("\nFound ZTF object information on Fritz")
             else:
                 raise ValueError("Please enter ra and dec")
         else:
