@@ -217,7 +217,7 @@ class PlanObservation:
             self.observable = False
             self.rejection_reason = "airmass"
 
-        if self.coordinates_galactic.b.deg < 10:
+        if np.abs(self.coordinates_galactic.b.deg) < 10:
             self.observable = False
             self.rejection_reason = "proximity to gal. plane"
 
