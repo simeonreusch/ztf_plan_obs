@@ -467,7 +467,8 @@ class PlanObservation:
         outpath_pdf = os.path.join(self.name, f"{self.name}_airmass.pdf")
         plt.savefig(outpath_png, dpi=300, bbox_inches="tight")
         plt.savefig(outpath_pdf, bbox_inches="tight")
-        plt.close()
+        # plt.close()
+        
         return ax
 
     def search_match_in_archive(self, archive):

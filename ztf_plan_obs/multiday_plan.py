@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import matplotlib.pyplot as plt
-from datetime import date, datetime
+import os
+from datetime import datetime, date
 from matplotlib.backends.backend_pdf import PdfPages
 from tqdm import tqdm
 from astropy.time import Time
@@ -21,6 +22,7 @@ class MultiDayObservation:
         name: str,
         ra: float = None,
         dec: float = None,
+        startdate = None,
         verbose: bool = True,
         **kwargs,
     ):
@@ -31,8 +33,13 @@ class MultiDayObservation:
 
         today = date.today()
         now = datetime.now()
-        now_astropy = Time(str(now), format="iso", scale="utc", out_subfmt="date")
-        next_days = [(now_astropy + i - 1).value for i in NIGHTS]
+
+        if startdate is None:
+            now_astropy = Time(str(now), format="iso", scale="utc", out_subfmt="date")
+            next_days = [(now_astropy + i - 1).value for i in NIGHTS]
+        else:
+            startdate_astropy = Time(str(startdate), format="iso", scale="utc", out_subfmt="date")
+            next_days = [(startdate_astropy + i - 1).value for i in NIGHTS]
 
         if self.ra is None:
             plan_initial = PlanObservation(
@@ -52,7 +59,8 @@ class MultiDayObservation:
         r_band_start = []
         r_band_end = []
 
-        with PdfPages(f"{name}_multiday.pdf") as pdf:
+        pdf_outfile = os.path.join(name, f"{name}_multiday.pdf")
+        with PdfPages(pdf_outfile) as pdf:
             for i, day in enumerate(tqdm(next_days)):
                 if NIGHTS[i] not in SHORT_NIGHTS:
                     plan = PlanObservation(
@@ -60,7 +68,7 @@ class MultiDayObservation:
                     )
                 else:
                     if NIGHTS[i] in ONE_FILTER_NIGHTS:
-                        bands = ["r"]
+                        bands = ["g"]
                     else:
                         bands = ["g", "r"]
                     plan = PlanObservation(
@@ -86,30 +94,33 @@ class MultiDayObservation:
                 ax = plan.plot_target()
                 plt.tight_layout()
                 pdf.savefig()
+                plt.savefig("test.png")
                 plt.close()
 
-        self.summarytext = f"Your multi-day observation plan for {name}\n"
-        self.summarytext += "\n-------------------------------------------------\n"
-        self.summarytext += "g-band observations\n"
+        self.summarytext = f"\nYour multi-day observation plan for {name}\n"
 
+        self.summarytext += "-------------------------------------------------\n"
+        self.summarytext += "g-band observations\n"
         for i, item in enumerate(g_band_start):
+            if item is not None:
+                if observable[i]:
+                    self.summarytext += f"Night {NIGHTS[i]} {short_time(item.value)} - {short_time(g_band_end[i].value)}\n"
+            else:
+                self.summarytext += f"Night {NIGHTS[i]} NOT OBSERVABLE\n"
+        self.summarytext += "-------------------------------------------------\n"
+
+        self.summarytext += "\n-------------------------------------------------\n"
+        self.summarytext += "r-band observations\n"
+
+        for i, item in enumerate(r_band_start):
             if NIGHTS[i] not in ONE_FILTER_NIGHTS:
                 if item is not None:
                     if observable[i]:
-                        self.summarytext += f"Night {NIGHTS[i]} {short_time(item.value)} - {short_time(g_band_end[i].value)}\n"
+                        self.summarytext += f"Night {NIGHTS[i]} {short_time(item.value)} - {short_time(r_band_end[i].value)}\n"
                 else:
                     self.summarytext += f"Night {NIGHTS[i]} NOT OBSERVABLE\n"
         self.summarytext += "-------------------------------------------------\n\n"
 
-        self.summarytext += "-------------------------------------------------\n"
-        self.summarytext += "r-band observations\n"
-        for i, item in enumerate(r_band_start):
-            if item is not None:
-                if observable[i]:
-                    self.summarytext += f"Night {NIGHTS[i]} {short_time(item.value)} - {short_time(r_band_end[i].value)}\n"
-            else:
-                self.summarytext += f"Night {NIGHTS[i]} NOT OBSERVABLE\n"
-        self.summarytext += "-------------------------------------------------\n"
 
     def print_plan(self):
         print(self.summarytext)
