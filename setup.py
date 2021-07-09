@@ -30,7 +30,7 @@ if __name__ == "__main__":
         "matplotlib",
         "bs4",
         "flask",
-        "ztfquery",
+        "ztfquery>=1.15.7",
         "requests",
         "lxml",
         "html5lib",
