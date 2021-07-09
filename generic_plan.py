@@ -2,7 +2,7 @@
 from ztf_plan_obs.plan import PlanObservation
 
 # name = "testalert"  # Name of the alert object
-name = "ZTF20actqnhg"
+name = "ZTF21abjwvzu"
 date = "2020-11-29"  # This is optional, defaults to today
 # ra = 133.7
 # dec = 13.37

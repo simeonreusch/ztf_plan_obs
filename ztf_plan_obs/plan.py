@@ -138,10 +138,14 @@ class PlanObservation:
                 from ztf_plan_obs.fritzconnector import FritzInfo
 
                 fritz = FritzInfo([name])
+
                 self.ra = fritz.queryresult["ra"]
                 self.dec = fritz.queryresult["dec"]
 
                 self.datasource = "Fritz\n"
+
+                if np.isnan(self.ra):
+                    raise ValueError("Object apparently not found on Fritz")
 
                 print("\nFound ZTF object information on Fritz")
         elif ra is None:

@@ -14,7 +14,7 @@ class MarshalInfo:
     """ """
 
     def __init__(self, ztf_names, nprocess=16, logger=None):
-        print("LALALALALALLALA")
+
         import requests
         import pandas as pd
 
