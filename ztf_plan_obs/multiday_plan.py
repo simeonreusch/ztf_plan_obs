@@ -94,7 +94,6 @@ class MultiDayObservation:
                 ax = plan.plot_target()
                 plt.tight_layout()
                 pdf.savefig()
-                plt.savefig("test.png")
                 plt.close()
 
         self.summarytext = f"\nYour multi-day observation plan for {name}\n"

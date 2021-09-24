@@ -3,18 +3,19 @@
 # License: BSD-3-Clause
 
 from ztf_plan_obs.plan import PlanObservation, AirmassError, ParsingError, is_ztf_name
-
+from ztf_plan_obs.multiday_plan import MultiDayObservation
 
 class ObsBot:
 
     # The constructor for the class. It takes the channel name as the a
     # parameter and then sets it as an instance variable
-    def __init__(self, channel, name, ra=None, dec=None, date=None, alertsource=None):
+    def __init__(self, channel, name, ra=None, dec=None, date=None, multiday=False, alertsource=None):
         self.channel = channel
         self.name = name
         self.ra = ra
         self.dec = dec
         self.date = date
+        self.multiday = multiday
         self.alertsource = alertsource
 
     # Craft and return the entire message payload as a dictionary.

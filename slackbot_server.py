@@ -88,6 +88,7 @@ def message(payload):
             dec = None
             date = None
             radec_given = False
+            multiday = False
             alertsource = None
             channel_id = event.get("channel")
             name = split_text[1]
@@ -108,10 +109,32 @@ def message(payload):
                     tomorrow = Time(datetime.utcnow()) + 24 * u.h
                     date = str(tomorrow.datetime.date())
 
+            for i, parameter in enumerate(split_text):
+                if parameter in fuzzy_parameters(["multiday", "MULTIDAY", "Multiday", "multi", "MULTI", "Multi"]):
+                    multiday = True
+
             if not radec_given:
-                message = f"Hi there; creating your observability plot for *{name}*. One moment please."
+                if not multiday:
+                    if date:
+                        message = f"Hi there; creating your observability plot for *{name}*. Starting date is {date}. One moment please."
+                    else:
+                        message = f"Hi there; creating your observability plot for *{name}*. Starting date is today. One moment please."
+                else:
+                    if date:
+                        f"Hi there; creating your multiday observability plot for *{name}*. Starting date is {date}. One moment please."
+                    else:
+                        message = f"Hi there; creating your multiday observability plot for *{name}*. Starting date is today. One moment please."
             else:
-                message = f"Hi there; creating your observability plot for *{name}*. You specified RA={ra} and Dec={dec}. One moment please."
+                if not multiday:
+                    if date:
+                        message = f"Hi there; creating your observability plot for *{name}*. You specified RA={ra} and Dec={dec}. Starting date is {date}. One moment please."
+                    else:
+                        message = f"Hi there; creating your observability plot for *{name}*. You specified RA={ra} and Dec={dec}. Starting date is today. One moment please."
+                else:
+                    if date:
+                        message = f"Hi there; creating your multiday observability plot for *{name}*. You specified RA={ra} and Dec={dec}. Starting date is {date}. One moment please."
+                    else:
+                        message = f"Hi there; creating your multiday observability plot for *{name}*. You specified RA={ra} and Dec={dec}. Starting date is today. One moment please."
 
             if ra is None:
                 from ztf_plan_obs.plan import is_icecube_name, is_ztf_name
