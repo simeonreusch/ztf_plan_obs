@@ -37,7 +37,7 @@ def do_obs_plan(channel, name, ra=None, dec=None, date=None, multiday=False, ale
             text=f"Available fields: {obs_bot.fields}",
         )
 
-    if obs_bot.summary != "Not observable due to airmass constraint":
+    if obs_bot.summary != "Not observable due to airmass constraint" and not multiday:
         # Post the airmass plot
         imgpath_plot = f"{name}/{name}_airmass.png"
         imgdata_plot = open(imgpath_plot, "rb")
@@ -45,12 +45,24 @@ def do_obs_plan(channel, name, ra=None, dec=None, date=None, multiday=False, ale
             file=imgdata_plot, filename=imgpath_plot, channels=channel
         )
 
+    if obs_bot.summary != "Not observable due to airmass constraint"
         # Post the ZTF grid plots
         for field in obs_bot.fields:
             imgpath = f"{name}/{name}_grid_{field}.png"
             imgdata = open(imgpath, "rb")
             slack_web_client.files_upload(
                 file=imgdata, filename=imgpath, channels=channel
+            )
+        if multiday:
+            imgpath_plot = f"{name}/{name}_multiday.pdf"
+            imgdata_plot = open(imgpath_plot, "rb")
+            slack_web_client.files_upload(
+                file=imgdata_plot, filename=imgpath_plot, channels=channel
+            )
+            
+            slack_web_client.chat_postMessage(
+                channel=channel,
+                text=obs_bot.multiday_summary,
             )
 
 

@@ -36,6 +36,19 @@ class ObsBot:
             else:
                 self.summary = "Not observable!"
                 self.fields = None
+
+            if self.multiday:
+                multiday_plan = MultiDayObservation(
+                    name=self.name,
+                    ra=self.ra,
+                    dec=self.dec,
+                    startdate=self.date
+                )
+                if plan.observable is True:
+                    self.multiday_summary = multiday_plan.summarytext
+                else:
+                    self.multiday_summary = "Not observable!"
+
         except ParsingError:
             self.summary = "GCN parsing error"
             self.fields = None
