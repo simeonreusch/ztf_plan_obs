@@ -19,10 +19,10 @@ slack_events_adapter = SlackEventAdapter(
 slack_web_client = WebClient(token=os.environ.get("SLACK_TOKEN"))
 
 
-def do_obs_plan(channel, name, ra=None, dec=None, date=None, alertsource=None):
+def do_obs_plan(channel, name, ra=None, dec=None, date=None, multiday=False, alertsource=None):
     """ """
     obs_bot = ObsBot(
-        channel=channel, name=name, ra=ra, dec=dec, date=date, alertsource=alertsource
+        channel=channel, name=name, ra=ra, dec=dec, date=date, multiday=multiday,alertsource=alertsource
     )
     obs_bot.create_plot()
 
@@ -161,6 +161,7 @@ def message(payload):
                     ra=ra,
                     dec=dec,
                     date=date,
+                    multiday=multiday,
                     alertsource=alertsource,
                 )
 

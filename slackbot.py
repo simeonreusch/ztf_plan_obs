@@ -26,6 +26,7 @@ class ObsBot:
                 ra=self.ra,
                 dec=self.dec,
                 date=self.date,
+                multiday=self.multiday,
                 alertsource=self.alertsource,
             )
             plan.plot_target()

@@ -39,6 +39,7 @@ class PlanObservation:
         max_airmass=2.0,
         observationlength: float = 300,
         bands: list = ["g", "r"],
+        multiday: bool = False,
         alertsource: str = None,
         verbose: bool = True,
         **kwargs,
@@ -50,6 +51,7 @@ class PlanObservation:
         self.max_airmass = max_airmass
         self.observationlength = observationlength
         self.bands = bands
+        self.multiday = multiday
         self.ra_err = None
         self.dec_err = None
         self.warning = None
@@ -292,7 +294,7 @@ class PlanObservation:
             )
         summarytext += f"Separation from galactic plane: {self.coordinates_galactic.b.deg:.2f} deg\n"
 
-        if self.observable:
+        if self.observable and not self.multiday:
             summarytext += "Recommended observation times:\n"
             if "g" in self.bands:
                 gbandtext = f"g-band: {short_time(self.g_band_recommended_time_start)} - {short_time(self.g_band_recommended_time_end)} [UTC]"
