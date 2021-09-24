@@ -60,6 +60,7 @@ class MultiDayObservation:
         r_band_end = []
 
         pdf_outfile = os.path.join(name, f"{name}_multiday.pdf")
+
         with PdfPages(pdf_outfile) as pdf:
             for i, day in enumerate(tqdm(next_days)):
                 if NIGHTS[i] not in SHORT_NIGHTS:
@@ -80,7 +81,9 @@ class MultiDayObservation:
                         bands=bands,
                         verbose=False,
                     )
+
                 observable.append(plan.observable)
+
                 if observable:
                     g_band_start.append(plan.g_band_recommended_time_start)
                     g_band_end.append(plan.g_band_recommended_time_end)
@@ -91,6 +94,7 @@ class MultiDayObservation:
                     g_band_end.append(None)
                     r_band_start.append(None)
                     r_band_end.append(None)
+
                 ax = plan.plot_target()
                 plt.tight_layout()
                 pdf.savefig()

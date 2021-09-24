@@ -4,6 +4,7 @@
 
 from ztf_plan_obs.plan import PlanObservation, AirmassError, ParsingError, is_ztf_name
 from ztf_plan_obs.multiday_plan import MultiDayObservation
+import matplotlib.pyplot as plt
 
 class ObsBot:
 
@@ -30,6 +31,7 @@ class ObsBot:
                 alertsource=self.alertsource,
             )
             plan.plot_target()
+            plt.close()
             self.summary = plan.get_summary()
             if plan.observable is True:
                 self.fields = plan.request_ztf_fields()
