@@ -280,8 +280,9 @@ class PlanObservation:
         else:
             summarytext = f"Name = {self.name}\n"
 
-        if self.ra_err is not None:
-            summarytext += f"RA = {self.coordinates.ra.deg} + {self.ra_err[0]} - {self.ra_err[1]*-1}\nDec = {self.coordinates.dec.deg} + {self.dec_err[0]} - {self.dec_err[1]*-1}\n"
+        if self.ra_err:
+            if self.ra_err[0]:
+                summarytext += f"RA = {self.coordinates.ra.deg} + {self.ra_err[0]} - {self.ra_err[1]*-1}\nDec = {self.coordinates.dec.deg} + {self.dec_err[0]} - {self.dec_err[1]*-1}\n"
         else:
             summarytext += f"RADEC = {self.coordinates.ra.deg:.8f} {self.coordinates.dec.deg:.8f}\n"
 
