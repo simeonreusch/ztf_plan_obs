@@ -19,7 +19,7 @@ from datetime import datetime
 from astroplan.plots import plot_airmass, plot_altitude
 import requests
 from bs4 import BeautifulSoup
-from ztfquery import fields
+from ztfquery import fields, query
 from ztf_plan_obs import gcn_parser
 
 icecube = ["IceCube", "IC", "icecube", "ICECUBE", "Icecube"]
@@ -507,16 +507,26 @@ class PlanObservation:
         fieldids = list(fields.get_fields_containing_target(ra=self.ra, dec=self.dec))
         fieldids_ref = []
 
-        for f in fieldids:
-            print(f"Check IPAC if field {f} has references")
-            ref = fields.has_field_reference(f)
-            if ref["zg"] == True and ref["zr"] == True:
-                fieldids_ref.append(f)
-                print("It does :-)")
-            else:
-                print("It does not :-(")
+        zq = query.ZTFQuery()
+        querystring = f"field={fieldids[0]}"
 
-        print(f"Fields that are possible: {fieldids}")
+        if len(fieldids) > 1:
+            for f in fieldids[1:]:
+                querystring += f" OR field={f}"
+
+        print(
+            f"Checking IPAC if references are available in g- and r-band for fields {fieldids}"
+        )
+
+        zq.load_metadata(kind="ref", sql_query=querystring)
+        mt = zq.metatable
+
+        for f in mt.field.unique():
+            d = {k: k in mt["filtercode"].values for k in ["zg", "zr", "zi"]}
+            if d["zg"] == True and d["zr"] == True:
+                fieldids_ref.append(f)
+
+        print(f"Fields that contain target: {fieldids}")
         print(f"Of these have a reference: {fieldids_ref}")
 
         # quit()
