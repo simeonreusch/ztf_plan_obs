@@ -170,6 +170,9 @@ def message(payload):
                     site = split_text[i + 1]
                     if site not in available_sites:
                         message = f"Your site/telescope needs to be in the following list: {available_sites}"
+                        do_plan = False
+                    else:
+                        message += f" Chosen site: {site}"
 
             if ra is None:
                 from ztf_plan_obs.plan import is_icecube_name, is_ztf_name
