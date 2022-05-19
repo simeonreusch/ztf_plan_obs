@@ -360,6 +360,19 @@ class PlanObservation:
             color="gray",
         )
 
+        midnight = min(self.twilight_evening, self.twilight_morning) + 0.5 * (
+            max(self.twilight_evening, self.twilight_morning)
+            - min(self.twilight_evening, self.twilight_morning)
+        )
+
+        ax.annotate(
+            "Night",
+            xy=[midnight.plot_date, 85],
+            color="dimgray",
+            ha="center",
+            fontsize=12,
+        )
+
         # Plot a vertical line for the current time
         ax.axvline(Time(self.now).plot_date, color="black", label="now", ls="dotted")
 
@@ -478,11 +491,18 @@ class PlanObservation:
 
         plt.tight_layout()
 
-        outpath_png = os.path.join(self.name, f"{self.name}_airmass.png")
-        outpath_pdf = os.path.join(self.name, f"{self.name}_airmass.pdf")
+        if self.site.name == "Palomar":
+            outpath_png = os.path.join(self.name, f"{self.name}_airmass.png")
+            outpath_pdf = os.path.join(self.name, f"{self.name}_airmass.pdf")
+        else:
+            outpath_png = os.path.join(
+                self.name, f"{self.name}_airmass_{self.site.name}.png"
+            )
+            outpath_pdf = os.path.join(
+                self.name, f"{self.name}_airmass_{self.site.name}.pdf"
+            )
         plt.savefig(outpath_png, dpi=300, bbox_inches="tight")
         plt.savefig(outpath_pdf, bbox_inches="tight")
-        # plt.close()
 
         return ax
 
