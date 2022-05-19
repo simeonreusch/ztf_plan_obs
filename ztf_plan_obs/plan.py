@@ -20,7 +20,9 @@ from astroplan.plots import plot_airmass, plot_altitude
 import requests
 from bs4 import BeautifulSoup
 from ztfquery import fields, query
+from ztfquery.utils.tools import rot_xz_sph, _DEG2RA
 from ztf_plan_obs import gcn_parser
+from shapely.geometry import Polygon
 
 icecube = ["IceCube", "IC", "icecube", "ICECUBE", "Icecube"]
 ztf = ["ZTF", "ztf"]
@@ -489,7 +491,7 @@ class PlanObservation:
                 self.datasource = f"GCN Circular {self.gcn_nr}\n"
                 print("Archival data found, using these.")
 
-    def request_ztf_fields(self):
+    def request_ztf_fields(self, plot=True):
         """
         This looks at yupana.caltech.edu for the fields matching
         your location and downloads the camera grid plots for these
@@ -529,60 +531,49 @@ class PlanObservation:
         print(f"Fields that contain target: {fieldids}")
         print(f"Of these have a reference: {fieldids_ref}")
 
-        # quit()
+        self.fieldids_ref = fieldids_ref
 
-        # if self.ra_err is not None:
-        #     radec_err = max(max(self.ra_err), max(self.dec_err))
-        #     radius = 60 * radec_err
+        if plot:
+            self.plot_field()
 
-        # for grid in [1, 2]:
+    def plot_field(self):
+        """
+        Plot the ZTF field(s) with the target
+        """
+        ccds = fields._CCD_COORDS
 
-        #     request_data = {
-        #         "showobject": 1,
-        #         "objra": objra,
-        #         "objdec": objdec,
-        #         "grid": grid,
-        #         "objname": "unknown",
-        #         "radam": radius,
-        #         "submitshowobject": "SUBMIT (Show Object)",
-        #     }
+        for f in self.fieldids_ref:
+            centroid = fields.get_field_centroid(f)
 
-        #     # Get information on fields from yupana.caltech.edu
-        #     response = requests.get(URL, params=request_data)
+            fig, ax = plt.subplots(dpi=300)
 
-        #     # Parse the HTML response
-        #     soup = BeautifulSoup(response.text, "html5lib")
+            for c in ccds.CCD.unique():
+                ccd = ccds[ccds.CCD == c][["EW", "NS"]].values
+                ccd_draw = Polygon(ccd + centroid)
+                x, y = ccd_draw.exterior.xy
+                ax.plot(x, y, color="black")
 
-        #     pre = soup.find_all("pre")[-1]
-        #     results = pre.text.split("\n")[1:-3]
-        #     fieldids = []
-        #     fieldids_ref = []
+            if self.ra_err:
+                # Create errorbox
+                ul = [self.ra + self.ra_err[1], self.dec + self.dec_err[0]]
+                ur = [self.ra + self.ra_err[0], self.dec + self.dec_err[1]]
+                ll = [self.ra + self.ra_err[1], self.dec + self.dec_err[1]]
+                lr = [self.ra + self.ra_err[0], self.dec + self.dec_err[0]]
 
-        #     for result in results:
-        #         if len(result) > 10:
-        #             fieldid = int(result[0:7])
-        #             fieldids.append(fieldid)
-        #             fieldids_total.append(fieldid)
-        #             with warnings.catch_warnings():
-        #                 warnings.simplefilter("ignore")
-        #                 refs = fields.has_field_reference(fieldid)
-        #             if refs["zg"] == True and refs["zr"] == True:
-        #                 fieldids_ref.append(fieldid)
-        #                 fieldids_total_ref.append(fieldid)
+                errorbox = Polygon([ul, ll, ur, lr])
+                x, y = errorbox.exterior.xy
+                ax.plot(x, y, color="red")
 
-        #     # Download the camera images (URLS are static, images
-        #     # seem to be regenerated after each request)
-        #     for index, fieldid in enumerate(fieldids_ref):
-        #         img_data = requests.get(image_urls[index]).content
-        #         outpath = os.path.join(self.name, f"{self.name}_grid_{fieldid}.png")
-        #         with open(outpath, "wb") as handler:
-        #             handler.write(img_data)
+            ax.scatter([self.ra], [self.dec], color="red")
 
-        # print(f"Fields that are possible: {fieldids_total}")
-        # print(f"Of these have a reference: {fieldids_total_ref}")
+            ax.set_xlabel("RA")
+            ax.set_ylabel("Dec")
+            ax.set_title(f"Field {f}")
+            plt.tight_layout()
 
-        # return fieldids_total_ref
-        return fieldids_ref
+            outpath_png = os.path.join(self.name, f"{self.name}_grid_{f}.png")
+
+            fig.savefig(outpath_png, dpi=300)
 
     def plot_finding_chart(self):
         """ """
