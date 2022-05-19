@@ -34,6 +34,8 @@ if __name__ == "__main__":
         "requests",
         "lxml",
         "html5lib",
+        "shapely",
+        "geopandas",
     ]
 
     setup(

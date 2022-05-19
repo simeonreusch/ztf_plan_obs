@@ -3,7 +3,7 @@
 # GCN parsing code partially by Rober Stein (robert.stein@desy.de)
 # License: BSD-3-Clause
 
-import time, os, warnings
+import time, os, warnings, typing
 import astropy
 from astropy.time import Time
 from astropy import units as u
@@ -494,69 +494,85 @@ class PlanObservation:
         This looks at yupana.caltech.edu for the fields matching
         your location and downloads the camera grid plots for these
         """
-        URL = "http://yupana.caltech.edu/cgi-bin/ptf/tb//zoc"
-        image_url = "http://yupana.caltech.edu/marshals/tb//igmo_0_"
-        image_urls = [image_url + f"{x}.png" for x in [0, 1, 2, 3]]
+
+        # URL = "http://yupana.caltech.edu/cgi-bin/ptf/tb//zoc"
+        # image_url = "http://yupana.caltech.edu/marshals/tb//igmo_0_"
+        # image_urls = [image_url + f"{x}.png" for x in [0, 1, 2, 3]]
 
         objra = self.ra
         objdec = self.dec
 
         radius = 0
 
-        fieldids_total = []
-        fieldids_total_ref = []
+        fieldids = list(fields.get_fields_containing_target(ra=self.ra, dec=self.dec))
+        fieldids_ref = []
 
-        if self.ra_err is not None:
-            radec_err = max(max(self.ra_err), max(self.dec_err))
-            radius = 60 * radec_err
+        for f in fieldids:
+            print(f"Check IPAC if field {f} has references")
+            ref = fields.has_field_reference(f)
+            if ref["zg"] == True and ref["zr"] == True:
+                fieldids_ref.append(f)
+                print("It does :-)")
+            else:
+                print("It does not :-(")
 
-        for grid in [1, 2]:
+        print(f"Fields that are possible: {fieldids}")
+        print(f"Of these have a reference: {fieldids_ref}")
 
-            request_data = {
-                "showobject": 1,
-                "objra": objra,
-                "objdec": objdec,
-                "grid": grid,
-                "objname": "unknown",
-                "radam": radius,
-                "submitshowobject": "SUBMIT (Show Object)",
-            }
+        # quit()
 
-            # Get information on fields from yupana.caltech.edu
-            response = requests.get(URL, params=request_data)
+        # if self.ra_err is not None:
+        #     radec_err = max(max(self.ra_err), max(self.dec_err))
+        #     radius = 60 * radec_err
 
-            # Parse the HTML response
-            soup = BeautifulSoup(response.text, "html5lib")
+        # for grid in [1, 2]:
 
-            pre = soup.find_all("pre")[-1]
-            results = pre.text.split("\n")[1:-3]
-            fieldids = []
-            fieldids_ref = []
+        #     request_data = {
+        #         "showobject": 1,
+        #         "objra": objra,
+        #         "objdec": objdec,
+        #         "grid": grid,
+        #         "objname": "unknown",
+        #         "radam": radius,
+        #         "submitshowobject": "SUBMIT (Show Object)",
+        #     }
 
-            for result in results:
-                if len(result) > 10:
-                    fieldid = int(result[0:7])
-                    fieldids.append(fieldid)
-                    fieldids_total.append(fieldid)
-                    with warnings.catch_warnings():
-                        warnings.simplefilter("ignore")
-                        refs = fields.has_field_reference(fieldid)
-                    if refs["zg"] == True and refs["zr"] == True:
-                        fieldids_ref.append(fieldid)
-                        fieldids_total_ref.append(fieldid)
+        #     # Get information on fields from yupana.caltech.edu
+        #     response = requests.get(URL, params=request_data)
 
-            # Download the camera images (URLS are static, images
-            # seem to be regenerated after each request)
-            for index, fieldid in enumerate(fieldids_ref):
-                img_data = requests.get(image_urls[index]).content
-                outpath = os.path.join(self.name, f"{self.name}_grid_{fieldid}.png")
-                with open(outpath, "wb") as handler:
-                    handler.write(img_data)
+        #     # Parse the HTML response
+        #     soup = BeautifulSoup(response.text, "html5lib")
 
-        print(f"Fields that are possible: {fieldids_total}")
-        print(f"Of these have a reference: {fieldids_total_ref}")
+        #     pre = soup.find_all("pre")[-1]
+        #     results = pre.text.split("\n")[1:-3]
+        #     fieldids = []
+        #     fieldids_ref = []
 
-        return fieldids_total_ref
+        #     for result in results:
+        #         if len(result) > 10:
+        #             fieldid = int(result[0:7])
+        #             fieldids.append(fieldid)
+        #             fieldids_total.append(fieldid)
+        #             with warnings.catch_warnings():
+        #                 warnings.simplefilter("ignore")
+        #                 refs = fields.has_field_reference(fieldid)
+        #             if refs["zg"] == True and refs["zr"] == True:
+        #                 fieldids_ref.append(fieldid)
+        #                 fieldids_total_ref.append(fieldid)
+
+        #     # Download the camera images (URLS are static, images
+        #     # seem to be regenerated after each request)
+        #     for index, fieldid in enumerate(fieldids_ref):
+        #         img_data = requests.get(image_urls[index]).content
+        #         outpath = os.path.join(self.name, f"{self.name}_grid_{fieldid}.png")
+        #         with open(outpath, "wb") as handler:
+        #             handler.write(img_data)
+
+        # print(f"Fields that are possible: {fieldids_total}")
+        # print(f"Of these have a reference: {fieldids_total_ref}")
+
+        # return fieldids_total_ref
+        return fieldids_ref
 
     def plot_finding_chart(self):
         """ """

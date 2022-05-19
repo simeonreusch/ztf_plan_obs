@@ -19,10 +19,18 @@ slack_events_adapter = SlackEventAdapter(
 slack_web_client = WebClient(token=os.environ.get("SLACK_TOKEN"))
 
 
-def do_obs_plan(channel, name, ra=None, dec=None, date=None, multiday=False, alertsource=None):
+def do_obs_plan(
+    channel, name, ra=None, dec=None, date=None, multiday=False, alertsource=None
+):
     """ """
     obs_bot = ObsBot(
-        channel=channel, name=name, ra=ra, dec=dec, date=date, multiday=multiday,alertsource=alertsource
+        channel=channel,
+        name=name,
+        ra=ra,
+        dec=dec,
+        date=date,
+        multiday=multiday,
+        alertsource=alertsource,
     )
     obs_bot.create_plot()
 
@@ -47,12 +55,12 @@ def do_obs_plan(channel, name, ra=None, dec=None, date=None, multiday=False, ale
 
     if obs_bot.summary != "Not observable due to airmass constraint":
         # Post the ZTF grid plots
-        for field in obs_bot.fields:
-            imgpath = f"{name}/{name}_grid_{field}.png"
-            imgdata = open(imgpath, "rb")
-            slack_web_client.files_upload(
-                file=imgdata, filename=imgpath, channels=channel
-            )
+        # for field in obs_bot.fields:
+        #     imgpath = f"{name}/{name}_grid_{field}.png"
+        #     imgdata = open(imgpath, "rb")
+        #     slack_web_client.files_upload(
+        #         file=imgdata, filename=imgpath, channels=channel
+        #     )
         if multiday:
             imgpath_plot = f"{name}/{name}_multiday.pdf"
             imgdata_plot = open(imgpath_plot, "rb")
@@ -122,7 +130,9 @@ def message(payload):
                     date = str(tomorrow.datetime.date())
 
             for i, parameter in enumerate(split_text):
-                if parameter in fuzzy_parameters(["multiday", "MULTIDAY", "Multiday", "multi", "MULTI", "Multi"]):
+                if parameter in fuzzy_parameters(
+                    ["multiday", "MULTIDAY", "Multiday", "multi", "MULTI", "Multi"]
+                ):
                     multiday = True
 
             if not radec_given:
