@@ -139,14 +139,17 @@ def message(payload):
                     multiday = True
 
             available_sites = EarthLocation.get_site_names()
+            print(split_text)
+
             for i, parameter in enumerate(split_text):
                 if parameter in fuzzy_parameters(
                     ["site", "Site", "telescope", "Telescope"]
                 ):
                     site = split_text[i + 1]
-                    if not site or site not in available_sites:
+                    if site not in available_sites:
                         message = f"Your site/telescope needs to be in the following list: {available_sites}"
                         do_plan = False
+                        print(site)
 
             if not radec_given:
                 if not multiday:
