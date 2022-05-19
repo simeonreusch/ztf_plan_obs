@@ -57,7 +57,10 @@ def do_obs_plan(
 
     if slack_bot.summary != "Not observable due to airmass constraint" and not multiday:
         # Post the airmass plot
-        imgpath_plot = f"{name}/{name}_airmass.png"
+        if site == "Palomar":
+            imgpath_plot = f"{name}/{name}_airmass.png"
+        else:
+            imgpath_plot = f"{name}/{name}_airmass_{site}.png"
         imgdata_plot = open(imgpath_plot, "rb")
         slack_web_client.files_upload(
             file=imgdata_plot, filename=imgpath_plot, channels=channel
