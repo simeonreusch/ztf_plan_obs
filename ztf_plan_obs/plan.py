@@ -17,8 +17,6 @@ from astroplan import Observer, is_observable
 from astroplan.plots import plot_finder_image
 from datetime import datetime
 from astroplan.plots import plot_airmass, plot_altitude
-import requests
-from bs4 import BeautifulSoup
 from ztfquery import fields, query
 from ztfquery.utils.tools import rot_xz_sph, _DEG2RA
 from ztf_plan_obs import gcn_parser
