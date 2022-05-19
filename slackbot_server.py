@@ -138,19 +138,6 @@ def message(payload):
                 ):
                     multiday = True
 
-            available_sites = EarthLocation.get_site_names()
-            print(split_text)
-
-            for i, parameter in enumerate(split_text):
-                if parameter in fuzzy_parameters(
-                    ["site", "Site", "telescope", "Telescope"]
-                ):
-                    site = split_text[i + 1]
-                    if site not in available_sites:
-                        message = f"Your site/telescope needs to be in the following list: {available_sites}"
-                        do_plan = False
-                        print(site)
-
             if not radec_given:
                 if not multiday:
                     if date:
@@ -173,6 +160,16 @@ def message(payload):
                         message = f"Hi there; creating your multiday observability plot for *{name}*. You specified RA={ra} and Dec={dec}. Starting date is {date}. One moment please."
                     else:
                         message = f"Hi there; creating your multiday observability plot for *{name}*. You specified RA={ra} and Dec={dec}. Starting date is today. One moment please."
+
+            available_sites = EarthLocation.get_site_names()
+
+            for i, parameter in enumerate(split_text):
+                if parameter in fuzzy_parameters(
+                    ["site", "Site", "telescope", "Telescope"]
+                ):
+                    site = split_text[i + 1]
+                    if site not in available_sites:
+                        message = f"Your site/telescope needs to be in the following list: {available_sites}"
 
             if ra is None:
                 from ztf_plan_obs.plan import is_icecube_name, is_ztf_name
