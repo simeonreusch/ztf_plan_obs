@@ -5,11 +5,13 @@
 import os, datetime, logging
 from astropy.time import Time
 from astropy import units as u
+
 from datetime import datetime
 from flask import Flask
 from slack import WebClient
 from slackeventsapi import SlackEventAdapter
-from slackbot import ObsBot
+from slackbot import Slackbot
+from astropy.coordinates import EarthLocation
 
 app = Flask(__name__)
 
@@ -23,7 +25,7 @@ def do_obs_plan(
     channel, name, ra=None, dec=None, date=None, multiday=False, alertsource=None
 ):
     """ """
-    obs_bot = ObsBot(
+    slack_bot = Slackbot(
         channel=channel,
         name=name,
         ra=ra,
@@ -32,20 +34,20 @@ def do_obs_plan(
         multiday=multiday,
         alertsource=alertsource,
     )
-    obs_bot.create_plot()
+    slack_bot.create_plot()
 
     # Post a text summary
     slack_web_client.chat_postMessage(
         channel=channel,
-        text=obs_bot.summary,
+        text=slack_bot.summary,
     )
-    if obs_bot.fields is not None:
+    if slack_bot.fields is not None:
         slack_web_client.chat_postMessage(
             channel=channel,
-            text=f"Available fields: {obs_bot.fields}",
+            text=f"Available fields: {slack_bot.fields}",
         )
 
-    if obs_bot.summary != "Not observable due to airmass constraint" and not multiday:
+    if slack_bot.summary != "Not observable due to airmass constraint" and not multiday:
         # Post the airmass plot
         imgpath_plot = f"{name}/{name}_airmass.png"
         imgdata_plot = open(imgpath_plot, "rb")
@@ -53,9 +55,9 @@ def do_obs_plan(
             file=imgdata_plot, filename=imgpath_plot, channels=channel
         )
 
-    if obs_bot.summary != "Not observable due to airmass constraint":
+    if slack_bot.summary != "Not observable due to airmass constraint":
         # Post the ZTF grid plots
-        for field in obs_bot.fields:
+        for field in slack_bot.fields:
             imgpath = f"{name}/{name}_grid_{field}.png"
             imgdata = open(imgpath, "rb")
             slack_web_client.files_upload(
@@ -70,7 +72,7 @@ def do_obs_plan(
 
             slack_web_client.chat_postMessage(
                 channel=channel,
-                text=obs_bot.multiday_summary,
+                text=slack_bot.multiday_summary,
             )
 
 
@@ -110,6 +112,7 @@ def message(payload):
             radec_given = False
             multiday = False
             alertsource = None
+            site = "Palomar"
             channel_id = event.get("channel")
             name = split_text[1]
 
@@ -134,6 +137,16 @@ def message(payload):
                     ["multiday", "MULTIDAY", "Multiday", "multi", "MULTI", "Multi"]
                 ):
                     multiday = True
+
+            available_sites = EarthLocation.get_site_names()
+            for i, parameter in enumerate(split_text):
+                if parameter in fuzzy_parameters(
+                    ["site", "Site", "telescope", "Telescope"]
+                ):
+                    site = split_text[i + 1]
+                    if not site or site not in available_sites:
+                        message = f"Your site/telescope needs to be in the following list: {available_sites}"
+                        do_plan = False
 
             if not radec_given:
                 if not multiday:

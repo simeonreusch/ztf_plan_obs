@@ -3,7 +3,7 @@ from ztf_plan_obs.plan import PlanObservation
 from ztf_plan_obs.multiday_plan import MultiDayObservation
 import matplotlib.pyplot as plt
 
-name = "IC220513A"  # Name of the alert object
+name = "IC220501A"  # Name of the alert object
 # name = "IC201007A"
 date = "2022-05-19"  # This is optional, defaults to today
 # ra = 242.58
@@ -16,7 +16,7 @@ plan.request_ztf_fields()  # Checks in which ZTF fields this object is observabl
 # # plan.plot_finding_chart()
 plt.close()
 
-name = "IC220513A"
+name = "IC220501A"
 date = "2022-05-19"
 
 observationplan = MultiDayObservation(name=name, startdate=date)

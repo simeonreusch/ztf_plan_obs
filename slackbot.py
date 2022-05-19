@@ -6,11 +6,18 @@ from ztf_plan_obs.plan import PlanObservation, AirmassError, ParsingError, is_zt
 from ztf_plan_obs.multiday_plan import MultiDayObservation
 import matplotlib.pyplot as plt
 
-class ObsBot:
 
-    # The constructor for the class. It takes the channel name as the a
-    # parameter and then sets it as an instance variable
-    def __init__(self, channel, name, ra=None, dec=None, date=None, multiday=False, alertsource=None):
+class Slackbot:
+    def __init__(
+        self,
+        channel,
+        name,
+        ra=None,
+        dec=None,
+        date=None,
+        multiday=False,
+        alertsource=None,
+    ):
         self.channel = channel
         self.name = name
         self.ra = ra
@@ -41,10 +48,7 @@ class ObsBot:
 
             if self.multiday:
                 multiday_plan = MultiDayObservation(
-                    name=self.name,
-                    ra=self.ra,
-                    dec=self.dec,
-                    startdate=self.date
+                    name=self.name, ra=self.ra, dec=self.dec, startdate=self.date
                 )
                 if plan.observable is True:
                     self.multiday_summary = multiday_plan.summarytext
