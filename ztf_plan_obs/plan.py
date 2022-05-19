@@ -532,11 +532,11 @@ class PlanObservation:
         self.fieldids_ref = fieldids_ref
 
         if plot:
-            self.plot_field()
+            self.plot_fields()
 
         return fieldids_ref
 
-    def plot_field(self):
+    def plot_fields(self):
         """
         Plot the ZTF field(s) with the target
         """
@@ -546,6 +546,8 @@ class PlanObservation:
             centroid = fields.get_field_centroid(f)
 
             fig, ax = plt.subplots(dpi=300)
+
+            ax.set_aspect("equal")
 
             for c in ccds.CCD.unique():
                 ccd = ccds[ccds.CCD == c][["EW", "NS"]].values
