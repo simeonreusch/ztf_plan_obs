@@ -534,6 +534,8 @@ class PlanObservation:
         if plot:
             self.plot_field()
 
+        return fieldids_ref
+
     def plot_field(self):
         """
         Plot the ZTF field(s) with the target
