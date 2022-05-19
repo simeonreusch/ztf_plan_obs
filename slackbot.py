@@ -44,7 +44,7 @@ class Slackbot:
             plt.close()
             self.summary = plan.get_summary()
             if plan.observable is True:
-                if self.site == "Palomar"
+                if self.site == "Palomar":
                     self.fields = plan.request_ztf_fields()
                 else:
                     self.fields = None

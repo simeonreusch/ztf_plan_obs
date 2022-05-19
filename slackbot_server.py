@@ -176,7 +176,7 @@ def message(payload):
                 if parameter in fuzzy_parameters(
                     ["site", "Site", "telescope", "Telescope"]
                 ):
-                    site = split_text[i + 1]
+                    site = str(split_text[i + 1]).replace("_", " ")
                     if site not in available_sites:
                         message = f"Your site/telescope needs to be in the following list: {available_sites}"
                         do_plan = False
