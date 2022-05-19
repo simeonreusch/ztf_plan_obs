@@ -436,7 +436,9 @@ class PlanObservation:
         x = np.linspace(start + 0.03, end + 0.03, 9)
 
         # Add recommended upper limit for airmass
-        y = np.full((len(x), 1), 30)
+        y = np.full((len(x), 0), 30)
+        y = np.ones(len(x)) * 30
+
         ax.errorbar(x, y, 2, color="red", lolims=True, fmt=" ")
 
         # Plot an airmass scale
@@ -475,7 +477,7 @@ class PlanObservation:
         plt.savefig(outpath_png, dpi=300, bbox_inches="tight")
         plt.savefig(outpath_pdf, bbox_inches="tight")
         # plt.close()
-        
+
         return ax
 
     def search_match_in_archive(self, archive):
