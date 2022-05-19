@@ -171,6 +171,9 @@ def message(payload):
                         message = f"Hi there; creating your multiday observability plot for *{name}*. You specified RA={ra} and Dec={dec}. Starting date is today. One moment please."
 
             available_sites = EarthLocation.get_site_names()
+            available_sites_reformatted = [
+                entry.replace(" ", "_") for entry in available_sites if entry is not ""
+            ]
 
             for i, parameter in enumerate(split_text):
                 if parameter in fuzzy_parameters(
@@ -178,7 +181,7 @@ def message(payload):
                 ):
                     site = str(split_text[i + 1]).replace("_", " ")
                     if site not in available_sites:
-                        message = f"Your site/telescope needs to be in the following list: {available_sites}"
+                        message = f"Your site/telescope needs to be in the following list: {available_sites_reformatted}"
                         do_plan = False
                     else:
                         message += f" Chosen site: {site}"
