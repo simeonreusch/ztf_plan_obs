@@ -22,7 +22,14 @@ slack_web_client = WebClient(token=os.environ.get("SLACK_TOKEN"))
 
 
 def do_obs_plan(
-    channel, name, ra=None, dec=None, date=None, multiday=False, alertsource=None
+    channel,
+    name,
+    ra=None,
+    dec=None,
+    date=None,
+    multiday=False,
+    alertsource=None,
+    site=None,
 ):
     """ """
     slack_bot = Slackbot(
@@ -33,6 +40,7 @@ def do_obs_plan(
         date=date,
         multiday=multiday,
         alertsource=alertsource,
+        site=site,
     )
     slack_bot.create_plot()
 
@@ -57,12 +65,13 @@ def do_obs_plan(
 
     if slack_bot.summary != "Not observable due to airmass constraint":
         # Post the ZTF grid plots
-        for field in slack_bot.fields:
-            imgpath = f"{name}/{name}_grid_{field}.png"
-            imgdata = open(imgpath, "rb")
-            slack_web_client.files_upload(
-                file=imgdata, filename=imgpath, channels=channel
-            )
+        if site in [None, "Palomar"]:
+            for field in slack_bot.fields:
+                imgpath = f"{name}/{name}_grid_{field}.png"
+                imgdata = open(imgpath, "rb")
+                slack_web_client.files_upload(
+                    file=imgdata, filename=imgpath, channels=channel
+                )
         if multiday:
             imgpath_plot = f"{name}/{name}_multiday.pdf"
             imgdata_plot = open(imgpath_plot, "rb")
@@ -201,6 +210,7 @@ def message(payload):
                     date=date,
                     multiday=multiday,
                     alertsource=alertsource,
+                    site=site,
                 )
 
 

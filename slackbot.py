@@ -17,6 +17,7 @@ class Slackbot:
         date=None,
         multiday=False,
         alertsource=None,
+        site=None,
     ):
         self.channel = channel
         self.name = name
@@ -25,6 +26,7 @@ class Slackbot:
         self.date = date
         self.multiday = multiday
         self.alertsource = alertsource
+        self.site = site
 
     # Craft and return the entire message payload as a dictionary.
     def create_plot(self):
@@ -36,12 +38,17 @@ class Slackbot:
                 date=self.date,
                 multiday=self.multiday,
                 alertsource=self.alertsource,
+                site=self.site,
             )
             plan.plot_target()
             plt.close()
             self.summary = plan.get_summary()
             if plan.observable is True:
-                self.fields = plan.request_ztf_fields()
+                if self.site == "Palomar"
+                    self.fields = plan.request_ztf_fields()
+                else:
+                    self.fields = None
+                    self.summary = "No fields available (select 'Palomar' as site)"
             else:
                 self.summary = "Not observable!"
                 self.fields = None

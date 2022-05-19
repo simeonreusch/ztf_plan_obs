@@ -40,6 +40,7 @@ class PlanObservation:
         bands: list = ["g", "r"],
         multiday: bool = False,
         alertsource: str = None,
+        site: str = "Palomar",
         verbose: bool = True,
         **kwargs,
     ):
@@ -47,6 +48,7 @@ class PlanObservation:
         self.name = name
         self.arrivaltime = arrivaltime
         self.alertsource = alertsource
+        self.site = site
         self.max_airmass = max_airmass
         self.observationlength = observationlength
         self.bands = bands
@@ -159,8 +161,7 @@ class PlanObservation:
         self.coordinates = SkyCoord(self.ra * u.deg, self.dec * u.deg, frame="icrs")
         self.coordinates_galactic = self.coordinates.galactic
         self.target = ap.FixedTarget(name=self.name, coord=self.coordinates)
-        self.site = Observer.at_site("Palomar", timezone="US/Pacific")
-        #'Roque de los Muchachos'
+        self.site = Observer.at_site(self.site, timezone="US/Pacific")
         self.now = Time(datetime.utcnow())
         self.date = date
 
@@ -294,34 +295,39 @@ class PlanObservation:
             )
         summarytext += f"Separation from galactic plane: {self.coordinates_galactic.b.deg:.2f} deg\n"
 
-        if self.observable and not self.multiday:
-            summarytext += "Recommended observation times:\n"
-            if "g" in self.bands:
-                gbandtext = f"g-band: {short_time(self.g_band_recommended_time_start)} - {short_time(self.g_band_recommended_time_end)} [UTC]"
-            if "r" in self.bands:
-                rbandtext = f"r-band: {short_time(self.r_band_recommended_time_start)} - {short_time(self.r_band_recommended_time_end)} [UTC]"
+        if self.site.name != "Palomar":
+            summarytext += f"Site: {self.site.name}"
 
-            if (
-                "g" in bands
-                and "r" in bands
-                and self.g_band_recommended_time_start
-                < self.r_band_recommended_time_start
-            ):
-                bandtexts = [gbandtext + "\n", rbandtext]
-            elif (
-                "g" in bands
-                and "r" in bands
-                and self.g_band_recommended_time_start
-                > self.r_band_recommended_time_start
-            ):
-                bandtexts = [rbandtext + "\n", gbandtext]
-            elif "g" in bands and "r" not in bands:
-                bandtexts = [gbandtext]
-            else:
-                bandtexts = [rbandtext]
+        if self.site.name == "Palomar":
 
-            for item in bandtexts:
-                summarytext += item
+            if self.observable and not self.multiday:
+                summarytext += "Recommended observation times:\n"
+                if "g" in self.bands:
+                    gbandtext = f"g-band: {short_time(self.g_band_recommended_time_start)} - {short_time(self.g_band_recommended_time_end)} [UTC]"
+                if "r" in self.bands:
+                    rbandtext = f"r-band: {short_time(self.r_band_recommended_time_start)} - {short_time(self.r_band_recommended_time_end)} [UTC]"
+
+                if (
+                    "g" in bands
+                    and "r" in bands
+                    and self.g_band_recommended_time_start
+                    < self.r_band_recommended_time_start
+                ):
+                    bandtexts = [gbandtext + "\n", rbandtext]
+                elif (
+                    "g" in bands
+                    and "r" in bands
+                    and self.g_band_recommended_time_start
+                    > self.r_band_recommended_time_start
+                ):
+                    bandtexts = [rbandtext + "\n", gbandtext]
+                elif "g" in bands and "r" not in bands:
+                    bandtexts = [gbandtext]
+                else:
+                    bandtexts = [rbandtext]
+
+                for item in bandtexts:
+                    summarytext += item
 
         if verbose:
             print(summarytext)
@@ -381,21 +387,22 @@ class PlanObservation:
             ax.set_xlabel(f"{self.now.datetime.date()} [UTC]")
         plt.grid(True, color="gray", linestyle="dotted", which="both", alpha=0.5)
 
-        if self.observable:
-            if "g" in self.bands:
-                ax.axvspan(
-                    self.g_band_recommended_time_start.plot_date,
-                    self.g_band_recommended_time_end.plot_date,
-                    alpha=0.5,
-                    color="green",
-                )
-            if "r" in self.bands:
-                ax.axvspan(
-                    self.r_band_recommended_time_start.plot_date,
-                    self.r_band_recommended_time_end.plot_date,
-                    alpha=0.5,
-                    color="red",
-                )
+        if self.site.name == "Palomar":
+            if self.observable:
+                if "g" in self.bands:
+                    ax.axvspan(
+                        self.g_band_recommended_time_start.plot_date,
+                        self.g_band_recommended_time_end.plot_date,
+                        alpha=0.5,
+                        color="green",
+                    )
+                if "r" in self.bands:
+                    ax.axvspan(
+                        self.r_band_recommended_time_start.plot_date,
+                        self.r_band_recommended_time_end.plot_date,
+                        alpha=0.5,
+                        color="red",
+                    )
 
         # Now we plot the moon altitudes and separation
         moon_altitudes = []
