@@ -46,3 +46,62 @@ plan.plot_target() # Plots the observing conditions
 plan.request_ztf_fields() # Checks in which ZTF fields this object is observable and download plot for them from http://yupana.caltech.edu
 ```
 ![](examples/figures/observation_plot_icecube.png)
+
+# Triggering ZTF
+
+`ztf_plan_obs` can be used for directly scheduling ToO observations with ZTF. 
+This is done through API calls to the `Kowalski` system, managed by the kowalski python manager [penquins](https://github.com/dmitryduev/penquins).
+
+To use this functionality, you must first configure the connection details. You need both an API token, and to know the address of the Kowalski host address.
+You can then set these as environment variables:
+
+```bash
+export KOWALSKI_HOST=something
+export KOWALSKI_API_TOKEM=somethingelse
+```
+
+You can then import helper functions for querying, submitting and deleting ToO schedules:
+
+## Querying
+
+```python
+from ztf_plan_obs.api import get_too_queues
+existing_too_requests = get_too_queues()
+print([x["name"] for x in existing_too_requests["data"]])
+```
+
+## Submitting
+
+```python
+from ztf_plan_obs.api import build_request, submit_request, get_too_queues
+
+queue_name = "ToO_IC220513A_test"
+
+request = build_request(
+    user="yourname",
+    queue_name=queue_name,
+    validity_window_start_mjd=59719.309333333334,
+    validity_window_end_mjd=59719.30988055556,
+    subprogram_name="ToO_Neutrino",
+    field_ids=[427],
+    filter_ids=[1],
+    exposure_times=[600.]
+) 
+print(request)
+submit_request(request)
+
+queue = get_too_queues()
+
+entries = [x["name"] for x in queue["data"]]
+print(entries)
+assert queue_name in entries
+```
+##Deleting
+```python
+from ztf_plan_obs.api import delete_request
+
+queue_name = "ToO_IC220513A_test"
+
+res = delete_request(user="yourname", queue_name=queue_name)
+print(res)
+```
