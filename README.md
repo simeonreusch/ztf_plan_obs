@@ -101,7 +101,8 @@ entries = [x["name"] for x in queue["data"]]
 print(entries)
 assert queue_name in entries
 ```
-##Deleting
+
+## Deleting
 ```python
 from ztf_plan_obs.api import delete_request
 
