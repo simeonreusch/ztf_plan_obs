@@ -27,6 +27,7 @@ if __name__ == "__main__":
         "numpy",
         "astroplan>=0.7",
         "pandas",
+        "penquins",
         "matplotlib",
         "flask",
         "ztfquery>=1.15.7",
