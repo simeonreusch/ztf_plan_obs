@@ -54,6 +54,11 @@ def do_obs_plan(
             channel=channel,
             text=f"Available fields: {slack_bot.fields}",
         )
+    if slack_bot.recommended_field is not None:
+        slack_web_client.chat_postMessage(
+            channel=channel,
+            text=f"Recommended field: {slack_bot.recommended_field} ({slack_bot.coverage[slack_bot.recommended_field]:.2f}% coverage)",
+        )
 
     if slack_bot.summary != "Not observable due to airmass constraint" and not multiday:
         # Post the airmass plot

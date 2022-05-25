@@ -13,24 +13,25 @@ port = 443
 api_token = os.environ.get("KOWALSKI_API_TOKEN")
 
 if api_token is None:
-    err = "No kowalski API token found. Set the envirnoment variable with \n" \
-          " export KOWALSKI_API_TOKEN=api_token"
+    err = (
+        "No kowalski API token found. Set the environment variable with \n"
+        "export KOWALSKI_API_TOKEN=api_token"
+    )
     raise APIError(err)
 
-kowalski = Kowalski(
-    token=api_token,
-    protocol=protocol,
-    host=host,
-    port=port
-)
+kowalski = Kowalski(token=api_token, protocol=protocol, host=host, port=port)
 if not kowalski.ping():
-    raise APIError("Ping of kowalski with specified token failed. Are you sure this token is correct?")
+    raise APIError(
+        "Ping of kowalski with specified token failed. Are you sure this token is correct?"
+    )
 
 
 def get_all_queues():
     res = kowalski.api("get", "/api/triggers/ztf")
     if res["status"] != "success":
-        raise APIError(f"API call failed with status '{res['status']}'' and message '{res['message']}''")
+        raise APIError(
+            f"API call failed with status '{res['status']}'' and message '{res['message']}''"
+        )
     return res
 
 
@@ -41,18 +42,17 @@ def get_too_queues():
 
 
 def build_queue_entry(
-        request_id: int,
-        field_id: int,
-        filter_id: int,
-        subprogram_name: str,
-        program_pi: str = "Kulkarni",
-        program_id: int = 2,
-        exposure_time: float = None,
-        ra: float = None,
-        dec: float = None,
-        n_repeats: int = None,
-        max_airmass: float = None
-
+    request_id: int,
+    field_id: int,
+    filter_id: int,
+    subprogram_name: str,
+    program_pi: str = "Kulkarni",
+    program_id: int = 2,
+    exposure_time: float = None,
+    ra: float = None,
+    dec: float = None,
+    n_repeats: int = None,
+    max_airmass: float = None,
 ) -> dict:
     args = locals()
 
@@ -63,25 +63,29 @@ def build_queue_entry(
             entry[key] = val
 
     if subprogram_name[:4] != "ToO_":
-        raise ValueError(f"Queue subprogram names must begin with 'ToO_', but you entered '{subprogram_name}'")
+        raise ValueError(
+            f"Queue subprogram names must begin with 'ToO_', but you entered '{subprogram_name}'"
+        )
 
     return entry
 
 
 def build_request(
-        user: str,
-        queue_name: str,
-        validity_window_start_mjd: float,
-        validity_window_end_mjd: float,
-        subprogram_name: str,
-        field_ids: list,
-        filter_ids: list,
-        exposure_times: list = None,
-        program_id: int = 2,
-        program_pi: str = "Kulkarni"
+    user: str,
+    queue_name: str,
+    validity_window_start_mjd: float,
+    validity_window_end_mjd: float,
+    subprogram_name: str,
+    field_ids: list,
+    filter_ids: list,
+    exposure_times: list = None,
+    program_id: int = 2,
+    program_pi: str = "Kulkarni",
 ):
     if queue_name[:4] != "ToO_":
-        raise ValueError(f"Queue names must begin with 'ToO_', but you entered '{queue_name}'")
+        raise ValueError(
+            f"Queue names must begin with 'ToO_', but you entered '{queue_name}'"
+        )
 
     targets = []
 
@@ -99,7 +103,7 @@ def build_request(
             subprogram_name=subprogram_name,
             program_pi=program_pi,
             program_id=program_id,
-            exposure_time=exp_time
+            exposure_time=exp_time,
         )
         targets.append(target)
 
@@ -107,11 +111,8 @@ def build_request(
         "user": user,
         "queue_name": queue_name,
         "queue_type": "list",
-        "validity_window_mjd": [
-            validity_window_start_mjd,
-            validity_window_end_mjd
-        ],
-        "targets": targets
+        "validity_window_mjd": [validity_window_start_mjd, validity_window_end_mjd],
+        "targets": targets,
     }
     return payload
 
@@ -120,17 +121,7 @@ def submit_request(payload):
     return kowalski.api(method="put", endpoint="/api/triggers/ztf", data=payload)
 
 
-def delete_request(
-        user,
-        queue_name
-):
-    req = {
-        "user": user,
-        "queue_name": queue_name
-    }
+def delete_request(user, queue_name):
+    req = {"user": user, "queue_name": queue_name}
 
     return kowalski.api(method="delete", endpoint="/api/triggers/ztf", data=req)
-
-
-
-

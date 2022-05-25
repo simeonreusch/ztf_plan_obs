@@ -61,6 +61,8 @@ class PlanObservation:
         self.datasource = None
         self.found_in_archive = False
         self.search_full_archive = False
+        self.coverage = None
+        self.recommended_field = None
 
         if ra is None and self.alertsource in icecube:
             if verbose:
@@ -568,6 +570,8 @@ class PlanObservation:
         """
         ccds = fields._CCD_COORDS
 
+        coverage = {}
+
         for f in self.fieldids_ref:
             centroid = fields.get_field_centroid(f)
 
@@ -575,9 +579,13 @@ class PlanObservation:
 
             ax.set_aspect("equal")
 
+            ccd_polygons = []
+            covered_area = 0
+
             for c in ccds.CCD.unique():
                 ccd = ccds[ccds.CCD == c][["EW", "NS"]].values
                 ccd_draw = Polygon(ccd + centroid)
+                ccd_polygons.append(ccd_draw)
                 x, y = ccd_draw.exterior.xy
                 ax.plot(x, y, color="black")
 
@@ -590,7 +598,15 @@ class PlanObservation:
 
                 errorbox = Polygon([ul, ll, ur, lr])
                 x, y = errorbox.exterior.xy
+
                 ax.plot(x, y, color="red")
+
+                for ccd in ccd_polygons:
+                    covered_area += errorbox.intersection(ccd).area
+
+                cov = covered_area / errorbox.area * 100
+
+                coverage.update({f: cov})
 
             ax.scatter([self.ra], [self.dec], color="red")
 
@@ -602,6 +618,12 @@ class PlanObservation:
             outpath_png = os.path.join(self.name, f"{self.name}_grid_{f}.png")
 
             fig.savefig(outpath_png, dpi=300)
+
+        self.coverage = coverage
+
+        max_coverage_field = max(coverage, key=coverage.get)
+
+        self.recommended_field = max_coverage_field
 
     def plot_finding_chart(self):
         """ """

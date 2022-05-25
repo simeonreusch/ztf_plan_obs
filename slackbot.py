@@ -27,6 +27,9 @@ class Slackbot:
         self.multiday = multiday
         self.alertsource = alertsource
         self.site = site
+        self.fields = None
+        self.recommended_field = None
+        self.coverage = None
 
     # Craft and return the entire message payload as a dictionary.
     def create_plot(self):
@@ -46,12 +49,13 @@ class Slackbot:
             if plan.observable is True:
                 if self.site == "Palomar":
                     self.fields = plan.request_ztf_fields()
+                    if plan.ra_err:
+                        self.recommended_field = plan.recommended_field
+                        self.coverage = plan.coverage
                 else:
-                    self.fields = None
                     self.summary = "No fields available (select 'Palomar' as site)"
             else:
                 self.summary = "Not observable!"
-                self.fields = None
 
             if self.multiday:
                 multiday_plan = MultiDayObservation(
@@ -64,4 +68,3 @@ class Slackbot:
 
         except ParsingError:
             self.summary = "GCN parsing error"
-            self.fields = None
