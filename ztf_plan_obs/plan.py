@@ -612,7 +612,10 @@ class PlanObservation:
 
             ax.set_xlabel("RA")
             ax.set_ylabel("Dec")
-            ax.set_title(f"Field {f}")
+            if self.ra_err:
+                ax.set_title(f"Field {f} (Coverage: {cov:.2f}%)")
+            else:
+                ax.set_title(f"Field {f}")
             plt.tight_layout()
 
             outpath_png = os.path.join(self.name, f"{self.name}_grid_{f}.png")
