@@ -252,14 +252,9 @@ def message(payload):
                 )
 
         elif split_text[0] in ["QUEUE", "Queue", "queue"]:
-            # if (
-            #     split_text[0] == "QUEUE"
-            #     or split_text[0] == "queue"
-            #     or split_text == "Queue"
-            # ):
             for i, parameter in enumerate(split_text):
                 if parameter in fuzzy_parameters(["get"]):
-                    queue = get_submitted_too(names_only=True)
+                    queue = get_submitted_too()
                     message = f"The current ToO queue:\n{queue}"
                     slack_web_client.chat_postMessage(
                         channel=channel_id,
@@ -268,7 +263,7 @@ def message(payload):
 
             for i, parameter in enumerate(split_text):
                 if parameter in fuzzy_parameters(["getfull"]):
-                    queue = get_submitted_too(names_only=True)
+                    queue = get_submitted_too()
                     message = f"The current ToO queue:\n{queue}"
                     slack_web_client.chat_postMessage(
                         channel=channel_id,
