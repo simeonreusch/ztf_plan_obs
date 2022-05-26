@@ -3,7 +3,6 @@
 # License: BSD-3-Clause
 
 import os, datetime, logging
-import urllib.request
 from astropy.time import Time
 from astropy import units as u
 
@@ -288,6 +287,4 @@ if __name__ == "__main__":
     logger.setLevel(logging.DEBUG)
     logger.addHandler(logging.StreamHandler())
 
-    external_ip = urllib.request.urlopen("https://ident.me").read().decode("utf8")
-
-    app.run(host=external_ip, port=3000)
+    app.run(host="168.119.229.141", port=3000)
