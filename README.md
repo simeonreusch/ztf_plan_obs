@@ -1,9 +1,7 @@
 # ztf_plan_obs
 Toolset for planning and triggering observations with ZTF. GCN parsing is currently only implemented for IceCube alerts.
 
-It checks if the object is observable with a maximum airmass on a given date, plots the airmass vs. time, computes two optimal (minimal airmass at night) observations of 300s in g- and r and generate the ZTF field plots for all fields having a reference.
-
-The output is designed so it can be directly pasted into the [GROWTH ToO Marshal](http://skipper.caltech.edu:8081/login?next=%2Fplan_manual) to schedule an observation.
+It checks if the object is observable with a maximum airmass on a given date, plots the airmass vs. time, computes two optimal (minimal airmass at night) observations of 300s in g- and r and generate the ZTF field plots for all fields having a reference. There is also the option to create a longer (multiday) observation plan.
 
 # Requirements
 [ztfquery](https://github.com/mickaelrigault/ztfquery) for checking if fields have a reference.
