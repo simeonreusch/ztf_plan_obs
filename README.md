@@ -71,7 +71,9 @@ You can then import helper functions for querying, submitting and deleting ToO s
 
 ```python
 from ztf_plan_obs.api import Queue
+
 q = Queue(user="yourname")
+
 existing_too_requests = get_too_queues(names_only=True)
 print(existing_too_requests)
 ```
@@ -83,7 +85,12 @@ from ztf_plan_obs.api import Queue
 
 trigger_name = "ToO_IC220513A_test"
 
+# Instantiate the API connection
 q = Queue(user="yourname")
+
+# Add a trigger to the internal submission queue.
+# If not specified otherwise, validity_window_end_mjd
+# is computed from the exposure time
 
 q.add_trigger_to_queue(
     trigger_name=trigger_name,
@@ -96,8 +103,9 @@ q.add_trigger_to_queue(
 print(q.queue)
 q.submit_queue()
 
-existing_too_requests = get_too_queues(names_only=True)
+# Now we verify that our trigger has been successfully submitted
 
+existing_too_requests = get_too_queues(names_only=True)
 print(existing_too_requests)
 assert trigger_name in existing_too_requests
 ```
@@ -105,10 +113,13 @@ assert trigger_name in existing_too_requests
 ## Deleting
 ```python
 from ztf_plan_obs.api import Queue
+
 q = Queue(user="yourname")
 
 trigger_name = "ToO_IC220513A_test"
 
 res = delete_request(trigger_name=trigger_name)
+
+# Now we check if it's gone
 print(res)
 ```
