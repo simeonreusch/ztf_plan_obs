@@ -70,44 +70,45 @@ You can then import helper functions for querying, submitting and deleting ToO s
 ## Querying
 
 ```python
-from ztf_plan_obs.api import get_too_queues
-existing_too_requests = get_too_queues()
-print([x["name"] for x in existing_too_requests["data"]])
+from ztf_plan_obs.api import Queue
+q = Queue(user="yourname")
+existing_too_requests = get_too_queues(names_only=True)
+print(existing_too_requests)
 ```
 
 ## Submitting
 
 ```python
-from ztf_plan_obs.api import build_request, submit_request, get_too_queues
+from ztf_plan_obs.api import Queue
 
-queue_name = "ToO_IC220513A_test"
+trigger_name = "ToO_IC220513A_test"
 
-request = build_request(
-    user="yourname",
-    queue_name=queue_name,
+q = Queue(user="yourname")
+
+q.add_trigger_to_queue(
+    trigger_name=trigger_name,
     validity_window_start_mjd=59719.309333333334,
-    validity_window_end_mjd=59719.30988055556,
-    subprogram_name="ToO_Neutrino",
-    field_ids=[427],
-    filter_ids=[1],
-    exposure_times=[600.]
-) 
-print(request)
-submit_request(request)
+    field_id=427,
+    filter_id=1,
+    exposure_time=300,
+)
 
-queue = get_too_queues()
+print(q.queue)
+q.submit_queue()
 
-entries = [x["name"] for x in queue["data"]]
-print(entries)
-assert queue_name in entries
+existing_too_requests = get_too_queues(names_only=True)
+
+print(existing_too_requests)
+assert trigger_name in existing_too_requests
 ```
 
 ## Deleting
 ```python
-from ztf_plan_obs.api import delete_request
+from ztf_plan_obs.api import Queue
+q = Queue(user="yourname")
 
-queue_name = "ToO_IC220513A_test"
+trigger_name = "ToO_IC220513A_test"
 
-res = delete_request(user="yourname", queue_name=queue_name)
+res = delete_request(trigger_name=trigger_name)
 print(res)
 ```

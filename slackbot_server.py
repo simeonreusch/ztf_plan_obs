@@ -12,6 +12,7 @@ from slack import WebClient
 from slackeventsapi import SlackEventAdapter
 from slackbot import Slackbot
 from astropy.coordinates import EarthLocation
+from ztf_plan_obs.api import Queue
 
 app = Flask(__name__)
 
@@ -93,7 +94,26 @@ def do_obs_plan(
             )
 
 
-def fuzzy_parameters(param_list):
+def get_too_queue() -> list:
+    q = Queue(user="DESY")
+    existing_too_queue = q.get_too_queues(names_only=True)
+
+    return existing_too_queue
+
+
+def get_full_queue() -> list:
+    q = Queue(user="DESY")
+    existing_queue = q.get_all_queues(names_only=True)
+
+    return existing_queue
+
+
+def delete_trigger(triggername) -> None:
+    q = Queue(user="DESY")
+    q.delete_trigger(triggername)
+
+
+def fuzzy_parameters(param_list) -> list:
     """ """
     fuzzy_parameters = []
     for param in param_list:
@@ -223,6 +243,19 @@ def message(payload):
                     alertsource=alertsource,
                     site=site,
                 )
+
+        if split_text[0] in ["QUEUE", "Queue", "queue"]:
+            for i, parameter in enumerate(split_text):
+                if parameter in fuzzy_parameters(["get"]):
+                    queue = get_too_queue()
+                    message = f"The current ToO queue:\n{queue}"
+                    slack_web_client.chat_postMessage(
+                        channel=channel_id,
+                        text=message,
+                    )
+                if parameter in fuzzy_parameters(["delete"]):
+                    triggername = split_text[i + 1]
+                    delete_trigger(triggername)
 
 
 if __name__ == "__main__":

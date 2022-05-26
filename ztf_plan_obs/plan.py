@@ -26,7 +26,9 @@ ztf = ["ZTF", "ztf"]
 
 
 class PlanObservation:
-    """ """
+    """
+    Class for planning observations
+    """
 
     def __init__(
         self,
@@ -43,7 +45,7 @@ class PlanObservation:
         site: str = "Palomar",
         verbose: bool = True,
         **kwargs,
-    ):
+    ) -> None:
 
         self.name = name
         self.arrivaltime = arrivaltime
@@ -63,6 +65,7 @@ class PlanObservation:
         self.search_full_archive = False
         self.coverage = None
         self.recommended_field = None
+        self.summary = {}
 
         if ra is None and self.alertsource in icecube:
             if verbose:
@@ -508,7 +511,7 @@ class PlanObservation:
 
         return ax
 
-    def search_match_in_archive(self, archive):
+    def search_match_in_archive(self, archive) -> None:
         """ """
         for archival_name, archival_number in archive:
             if self.name == archival_name:
@@ -517,7 +520,7 @@ class PlanObservation:
                 self.datasource = f"GCN Circular {self.gcn_nr}\n"
                 print("Archival data found, using these.")
 
-    def request_ztf_fields(self, plot=True):
+    def request_ztf_fields(self, plot=True) -> list:
         """
         This looks at yupana.caltech.edu for the fields matching
         your location and downloads the camera grid plots for these
