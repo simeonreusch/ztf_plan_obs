@@ -258,7 +258,10 @@ def message(payload):
             for i, parameter in enumerate(split_text):
                 if parameter in fuzzy_parameters(["get"]):
                     queue = get_submitted_too()
-                    message = f"The current ToO queue:\n{queue}"
+                    if len(queue) == 0:
+                        message = "Currently, no ToO triggers are in the queue."
+                    else:
+                        message = f"The current ToO queue:\n{queue}"
                     slack_web_client.chat_postMessage(
                         channel=channel_id,
                         text=message,
@@ -266,8 +269,8 @@ def message(payload):
 
             for i, parameter in enumerate(split_text):
                 if parameter in fuzzy_parameters(["getfull"]):
-                    queue = get_submitted_too()
-                    message = f"The current ToO queue:\n{queue}"
+                    queue = get_submitted_full()
+                    message = f"The full current queue:\n{queue}"
                     slack_web_client.chat_postMessage(
                         channel=channel_id,
                         text=message,
