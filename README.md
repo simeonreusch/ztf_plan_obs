@@ -27,7 +27,7 @@ dec = 13.37
 plan = ObservationPlan(name=name, date=date, ra=ra, dec=dec)
 plan.plot_target() # Plots the observing conditions
 plan.request_ztf_fields() # Checks in which ZTF fields this 
-# object is observable and generate plot for them.
+# object is observable and generates plots for them.
 ```
 The observation plot and the ZTF field plots will be located in the current directory/[name]
 ![](examples/figures/observation_plot_generic.png)
@@ -48,7 +48,9 @@ date = "2020-10-08" #This is optional, defaults to today
 plan = ObservationPlan(name=name, date=date, alertsource="icecube")
 plan.plot_target() # Plots the observing conditions
 plan.request_ztf_fields() # Checks in which ZTF fields 
-ä# this object is observable and generate plot for them.
+# this object is observable and generates plots for them.
+print(plan.recommended_field) # In case there is an error in the
+# GCN, you will get the field with the most overlap here
 ```
 ![](examples/figures/observation_plot_icecube.png)
 
@@ -57,15 +59,14 @@ plan.request_ztf_fields() # Checks in which ZTF fields
 `ztf_plan_obs` can be used for directly scheduling ToO observations with ZTF. 
 This is done through API calls to the `Kowalski` system, managed by the kowalski python manager [penquins](https://github.com/dmitryduev/penquins).
 
-To use this functionality, you must first configure the connection details. You need both an API token, and to know the address of the Kowalski host address.
-You can then set these as environment variables:
+To use this functionality, you must first configure the connection details. You need both an API token, and to know the address of the Kowalski host address. You can then set these as environment variables:
 
 ```bash
 export KOWALSKI_HOST=something
 export KOWALSKI_API_TOKEN=somethingelse
 ```
 
-You can then import helper functions for querying, submitting and deleting ToO schedules:
+You can then import the Queue class for querying, submitting and deleting ToO triggers:
 
 ## Querying
 
