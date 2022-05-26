@@ -94,18 +94,24 @@ def do_obs_plan(
             )
 
 
-def get_too_queue() -> list:
+def get_submitted_too() -> list:
     q = Queue(user="DESY")
     existing_too_queue = q.get_too_queues(names_only=True)
+    message = ""
+    for entry in existing_too_queue:
+        message += f"{entry}\n"
+    message = message[:-1]
+    return message
 
-    return existing_too_queue
 
-
-def get_full_queue() -> list:
+def get_submitted_full() -> list:
     q = Queue(user="DESY")
     existing_queue = q.get_all_queues(names_only=True)
-
-    return existing_queue
+    message = ""
+    for entry in existing_queue:
+        message += f"{entry}\n"
+    message = message[:-1]
+    return message
 
 
 def delete_trigger(triggername) -> None:
@@ -247,12 +253,23 @@ def message(payload):
         if split_text[0] in ["QUEUE", "Queue", "queue"]:
             for i, parameter in enumerate(split_text):
                 if parameter in fuzzy_parameters(["get"]):
-                    queue = get_too_queue()
+                    queue = get_submitted_too(names_only=True)
                     message = f"The current ToO queue:\n{queue}"
                     slack_web_client.chat_postMessage(
                         channel=channel_id,
                         text=message,
                     )
+
+            for i, parameter in enumerate(split_text):
+                if parameter in fuzzy_parameters(["getfull"]):
+                    queue = get_submitted_too(names_only=True)
+                    message = f"The current ToO queue:\n{queue}"
+                    slack_web_client.chat_postMessage(
+                        channel=channel_id,
+                        text=message,
+                    )
+
+            for i, parameter in enumerate(split_text):
                 if parameter in fuzzy_parameters(["delete"]):
                     triggername = split_text[i + 1]
                     delete_trigger(triggername)
