@@ -143,11 +143,12 @@ def message(payload):
 
         text = text.replace("*", "")
         split_text = text.split()
+        logger.info(split_text)
 
         if len(split_text) == 0:
             return
 
-        if split_text[0] == "Plan" or split_text[0] == "plan":
+        elif split_text[0] == "Plan" or split_text[0] == "plan":
             do_plan = True
             ra = None
             dec = None
@@ -250,12 +251,12 @@ def message(payload):
                     site=site,
                 )
 
-        # if split_text[0] in ["QUEUE", "Queue", "queue"]:
-        if (
-            split_text[0] == "QUEUE"
-            or split_text[0] == "queue"
-            or split_text == "Queue"
-        ):
+        elif split_text[0] in ["QUEUE", "Queue", "queue"]:
+            # if (
+            #     split_text[0] == "QUEUE"
+            #     or split_text[0] == "queue"
+            #     or split_text == "Queue"
+            # ):
             for i, parameter in enumerate(split_text):
                 if parameter in fuzzy_parameters(["get"]):
                     queue = get_submitted_too(names_only=True)
