@@ -250,9 +250,12 @@ def message(payload):
                     site=site,
                 )
 
-        print(split_text)
-
-        if split_text[0] in ["QUEUE", "Queue", "queue"]:
+        # if split_text[0] in ["QUEUE", "Queue", "queue"]:
+        if (
+            split_text[0] == "QUEUE"
+            or split_text[0] == "queue"
+            or split_text == "Queue"
+        ):
             for i, parameter in enumerate(split_text):
                 if parameter in fuzzy_parameters(["get"]):
                     queue = get_submitted_too(names_only=True)
