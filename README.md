@@ -1,5 +1,5 @@
 # ztf_plan_obs
-Toolset for planning observations with ZTF. GCN parsing is currently only implemented for IceCube alerts.
+Toolset for planning and triggering observations with ZTF. GCN parsing is currently only implemented for IceCube alerts.
 
 It checks if the object is observable with a maximum airmass on a given date, plots the airmass vs. time, computes two optimal (minimal airmass at night) observations of 300s in g- and r and generate the ZTF field plots for all fields having a reference.
 
