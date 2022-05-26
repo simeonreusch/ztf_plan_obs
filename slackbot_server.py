@@ -3,6 +3,7 @@
 # License: BSD-3-Clause
 
 import os, datetime, logging
+import urllib.request
 from astropy.time import Time
 from astropy import units as u
 
@@ -259,9 +260,9 @@ def message(payload):
                 if parameter in fuzzy_parameters(["get"]):
                     queue = get_submitted_too()
                     if len(queue) == 0:
-                        message = "Currently, no ToO triggers are in the queue."
+                        message = "Currently, no ToO triggers are in the ZTF observation queue."
                     else:
-                        message = f"The current ToO queue:\n{queue}"
+                        message = f"The current ZTF ToO observation queue:\n{queue}"
                     slack_web_client.chat_postMessage(
                         channel=channel_id,
                         text=message,
@@ -270,7 +271,7 @@ def message(payload):
             for i, parameter in enumerate(split_text):
                 if parameter in fuzzy_parameters(["getfull"]):
                     queue = get_submitted_full()
-                    message = f"The full current queue:\n{queue}"
+                    message = f"The complete current ZTF observation queue:\n{queue}"
                     slack_web_client.chat_postMessage(
                         channel=channel_id,
                         text=message,
@@ -287,4 +288,6 @@ if __name__ == "__main__":
     logger.setLevel(logging.DEBUG)
     logger.addHandler(logging.StreamHandler())
 
-    app.run(host="168.119.229.141", port=3000)
+    external_ip = urllib.request.urlopen("https://ident.me").read().decode("utf8")
+
+    app.run(host=external_ip, port=3000)
