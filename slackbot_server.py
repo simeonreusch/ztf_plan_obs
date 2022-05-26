@@ -250,6 +250,8 @@ def message(payload):
                     site=site,
                 )
 
+        print(split_text)
+
         if split_text[0] in ["QUEUE", "Queue", "queue"]:
             for i, parameter in enumerate(split_text):
                 if parameter in fuzzy_parameters(["get"]):
