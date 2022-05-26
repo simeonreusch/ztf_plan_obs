@@ -24,7 +24,7 @@ date = "2020-05-05" #This is optional, defaults to today
 ra = 133.7
 dec = 13.37
 
-plan = ObservationPlan(name=name, date=date, ra=ra, dec=dec)
+plan = PlanObservation(name=name, date=date, ra=ra, dec=dec)
 plan.plot_target() # Plots the observing conditions
 plan.request_ztf_fields() # Checks in which ZTF fields this 
 # object is observable and generates plots for them.
@@ -45,7 +45,7 @@ date = "2020-10-08" #This is optional, defaults to today
 # for the alert name. If it is not found, it will use 
 #the latest GCN notice (these are automated).
 
-plan = ObservationPlan(name=name, date=date, alertsource="icecube")
+plan = PlanObservation(name=name, date=date, alertsource="icecube")
 plan.plot_target() # Plots the observing conditions
 plan.request_ztf_fields() # Checks in which ZTF fields 
 # this object is observable and generates plots for them.
@@ -53,6 +53,7 @@ print(plan.recommended_field) # In case there is an error in the
 # GCN, you will get the field with the most overlap here
 ```
 ![](examples/figures/observation_plot_icecube.png)
+![](examples/figures/grid_icecube.png)
 
 # Triggering ZTF
 
