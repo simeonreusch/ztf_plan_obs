@@ -252,6 +252,9 @@ def message(payload):
                 )
 
         elif split_text[0] in ["QUEUE", "Queue", "queue"]:
+
+            channel_id = event.get("channel")
+
             for i, parameter in enumerate(split_text):
                 if parameter in fuzzy_parameters(["get"]):
                     queue = get_submitted_too()
