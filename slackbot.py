@@ -71,7 +71,7 @@ class Slackbot:
                     self.multiday_summary = "Not observable!"
 
                 if self.submit_trigger:
-                    triggers = multiday_plan.summary
+                    triggers = multiday_plan.triggers
                     q = Queue(user="DESY")
 
                     for i, trigger in enumerate(triggers):
@@ -82,10 +82,12 @@ class Slackbot:
                             filter_id=trigger["filter_id"],
                             exposure_time=trigger["exposure_time"],
                         )
-
-                    print(q.queue)
                     q.submit_queue()
-                    self.multiday_summary += f"\nYOU HAVE TRIGGERED ALL OBSERVATIONS ({len(q.queue)} in total)!\nCheck with 'Queue -get' if they have been added successfully."
+
+                    self.multiday_summary += f"\nYOU HAVE TRIGGERED ALL OBSERVATIONS ({len(q.queue)} in total)!\nCheck with 'Queue -get' if they have been added successfully.\nYour triggers:\n"
+
+                    triggertext = multiday_plan.print_triggers()
+                    self.multiday_summary += triggertext
 
         except ParsingError:
             self.summary = "GCN parsing error"

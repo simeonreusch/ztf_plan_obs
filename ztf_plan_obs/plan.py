@@ -720,6 +720,13 @@ def isotime_to_mjd(isotime: str):
     return Time(isotime, format="iso", scale="utc").mjd
 
 
+def mjd_to_isotime(mjd: float):
+    """
+    Convert time in mjd to iso-format
+    """
+    return Time(mjd, format="mjd", scale="utc").iso
+
+
 def short_time(time):
     """
     Better readable time - remove subseconds

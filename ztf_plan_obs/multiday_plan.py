@@ -12,6 +12,7 @@ from ztf_plan_obs.plan import (
     short_time,
     isotime_delta_to_seconds,
     isotime_to_mjd,
+    mjd_to_isotime,
 )
 
 NIGHTS = [1, 2, 3, 5, 7, 9]
@@ -36,7 +37,7 @@ class MultiDayObservation:
         self.ra = ra
         self.dec = dec
 
-        self.summary: list = []
+        self.triggers: list = []
 
         today = date.today()
         now = datetime.now()
@@ -67,6 +68,8 @@ class MultiDayObservation:
         g_band_end = []
         r_band_start = []
         r_band_end = []
+
+        plan_initial.request_ztf_fields()
 
         if plan_initial.ra_err:
             recommended_field = plan_initial.recommended_field
@@ -123,7 +126,7 @@ class MultiDayObservation:
                     exposure_time = isotime_delta_to_seconds(
                         isotime_start=item.value, isotime_end=g_band_end[i].value
                     )
-                    self.summary.append(
+                    self.triggers.append(
                         {
                             "field_id": recommended_field,
                             "filter_id": 1,
@@ -146,7 +149,7 @@ class MultiDayObservation:
                         exposure_time = isotime_delta_to_seconds(
                             isotime_start=item.value, isotime_end=r_band_end[i].value
                         )
-                        self.summary.append(
+                        self.triggers.append(
                             {
                                 "field_id": recommended_field,
                                 "filter_id": 2,
@@ -161,3 +164,12 @@ class MultiDayObservation:
 
     def print_plan(self):
         print(self.summarytext)
+
+    def print_triggers(self):
+        message = ""
+        for i, trigger in enumerate(self.triggers):
+            t_start = short_time(mjd_to_isotime(trigger["mjd_start"]))
+            message += f"{t_start} // {trigger['exposure_time']} s exposure // filter={trigger['filter_id']} // field={trigger['field_id']}\n"
+        message = message[:-1]
+        print(message)
+        return message
