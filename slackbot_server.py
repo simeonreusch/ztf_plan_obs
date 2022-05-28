@@ -29,6 +29,7 @@ def do_obs_plan(
     dec=None,
     date=None,
     multiday=False,
+    submit_trigger=False,
     alertsource=None,
     site=None,
 ):
@@ -40,6 +41,7 @@ def do_obs_plan(
         dec=dec,
         date=date,
         multiday=multiday,
+        submit_trigger=submit_trigger,
         alertsource=alertsource,
         site=site,
     )
@@ -197,9 +199,12 @@ def message(payload):
                         message = f"Hi there; creating your observability plot for *{name}*. Starting date is today. One moment please."
                 else:
                     if date:
-                        f"Hi there; creating your multiday observability plot for *{name}*. Starting date is {date}. One moment please."
+                        if not submit_trigger:
+                            message = f"Hi there; creating your multiday observability plot for *{name}*. Starting date is {date}. One moment please."
+                        else:
+                            message = f"Hi there; creating your multiday observability plot for *{name}*. Starting date is {date}.\n\n!! The full multiday plan will be triggered !!\nPlease check the ZTF queue with 'Queue -get'."
                     else:
-                        if submit_trigger:
+                        if not submit_trigger:
                             message = f"Hi there; creating your multiday observability plot for *{name}*. Starting date is today. One moment please."
                         else:
                             message = f"Hi there; creating your multiday observability plot for *{name}*. Starting date is today.\n\n!! The full multiday plan will be triggered !!\nPlease check the ZTF queue with 'Queue -get'."
