@@ -7,7 +7,12 @@ from tqdm import tqdm
 from astropy.time import Time
 from astropy import units as u
 from ztf_plan_obs.plan import PlanObservation
-from ztf_plan_obs.plan import round_time, short_time
+from ztf_plan_obs.plan import (
+    round_time,
+    short_time,
+    isotime_delta_to_seconds,
+    isotime_to_mjd,
+)
 
 NIGHTS = [1, 2, 3, 5, 7, 9]
 SHORT_NIGHTS = NIGHTS[1:]
@@ -22,7 +27,7 @@ class MultiDayObservation:
         name: str,
         ra: float = None,
         dec: float = None,
-        startdate = None,
+        startdate=None,
         verbose: bool = True,
         **kwargs,
     ):
@@ -31,6 +36,8 @@ class MultiDayObservation:
         self.ra = ra
         self.dec = dec
 
+        self.summary: list = []
+
         today = date.today()
         now = datetime.now()
 
@@ -38,7 +45,9 @@ class MultiDayObservation:
             now_astropy = Time(str(now), format="iso", scale="utc", out_subfmt="date")
             next_days = [(now_astropy + i - 1).value for i in NIGHTS]
         else:
-            startdate_astropy = Time(str(startdate), format="iso", scale="utc", out_subfmt="date")
+            startdate_astropy = Time(
+                str(startdate), format="iso", scale="utc", out_subfmt="date"
+            )
             next_days = [(startdate_astropy + i - 1).value for i in NIGHTS]
 
         if self.ra is None:
@@ -58,6 +67,9 @@ class MultiDayObservation:
         g_band_end = []
         r_band_start = []
         r_band_end = []
+
+        if plan_initial.ra_err:
+            recommended_field = plan_initial.recommended_field
 
         pdf_outfile = os.path.join(name, f"{name}_multiday.pdf")
 
@@ -108,6 +120,17 @@ class MultiDayObservation:
             if item is not None:
                 if observable[i]:
                     self.summarytext += f"Night {NIGHTS[i]} {short_time(item.value)} - {short_time(g_band_end[i].value)}\n"
+                    exposure_time = isotime_delta_to_seconds(
+                        isotime_start=item.value, isotime_end=g_band_end[i].value
+                    )
+                    self.summary.append(
+                        {
+                            "field_id": recommended_field,
+                            "filter_id": 1,
+                            "mjd_start": isotime_to_mjd(item.value),
+                            "exposure_time": exposure_time,
+                        }
+                    )
             else:
                 self.summarytext += f"Night {NIGHTS[i]} NOT OBSERVABLE\n"
         self.summarytext += "-------------------------------------------------\n"
@@ -120,10 +143,21 @@ class MultiDayObservation:
                 if item is not None:
                     if observable[i]:
                         self.summarytext += f"Night {NIGHTS[i]} {short_time(item.value)} - {short_time(r_band_end[i].value)}\n"
+                        exposure_time = isotime_delta_to_seconds(
+                            isotime_start=item.value, isotime_end=r_band_end[i].value
+                        )
+                        self.summary.append(
+                            {
+                                "field_id": recommended_field,
+                                "filter_id": 2,
+                                "mjd_start": isotime_to_mjd(item.value),
+                                "exposure_time": exposure_time,
+                            }
+                        )
+
                 else:
                     self.summarytext += f"Night {NIGHTS[i]} NOT OBSERVABLE\n"
         self.summarytext += "-------------------------------------------------\n\n"
-
 
     def print_plan(self):
         print(self.summarytext)

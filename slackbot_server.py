@@ -155,6 +155,7 @@ def message(payload):
             date = None
             radec_given = False
             multiday = False
+            submit_trigger = False
             alertsource = None
             site = "Palomar"
             channel_id = event.get("channel")
@@ -182,6 +183,12 @@ def message(payload):
                 ):
                     multiday = True
 
+            for i, parameter in enumerate(split_text):
+                if parameter in fuzzy_parameters(
+                    ["submit", "trigger", "Submit", "Trigger", "SUBMIT", "TRIGGER"]
+                ):
+                    submit_trigger = True
+
             if not radec_given:
                 if not multiday:
                     if date:
@@ -192,7 +199,10 @@ def message(payload):
                     if date:
                         f"Hi there; creating your multiday observability plot for *{name}*. Starting date is {date}. One moment please."
                     else:
-                        message = f"Hi there; creating your multiday observability plot for *{name}*. Starting date is today. One moment please."
+                        if submit_trigger:
+                            message = f"Hi there; creating your multiday observability plot for *{name}*. Starting date is today. One moment please."
+                        else:
+                            message = f"Hi there; creating your multiday observability plot for *{name}*. Starting date is today.\n\n!! The full multiday plan will be triggered !!\nPlease check the ZTF queue with 'Queue -get'."
             else:
                 if not multiday:
                     if date:
@@ -247,6 +257,7 @@ def message(payload):
                     dec=dec,
                     date=date,
                     multiday=multiday,
+                    submit_trigger=submit_trigger,
                     alertsource=alertsource,
                     site=site,
                 )

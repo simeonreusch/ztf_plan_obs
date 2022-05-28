@@ -692,6 +692,33 @@ def round_time(time):
     return time_rounded
 
 
+def mjd_delta_to_seconds(mjd_start, mjd_end):
+    """
+    Convert t_end - t_start (duration of obs)
+    given in mjd into a time delta in seconds
+    """
+    return round((mjd_end - mjd_start) * 86400)
+
+
+def isotime_delta_to_seconds(isotime_start, isotime_end):
+    """
+    Convert t_end - t_start (duration of obs) given in iso-time
+    into a time delta in seconds
+    """
+
+    mjd_start = isotime_to_mjd(isotime_start)
+    mjd_end = isotime_to_mjd(isotime_end)
+
+    return round((mjd_end - mjd_start) * 86400)
+
+
+def isotime_to_mjd(isotime: str):
+    """
+    Convert time in iso-format to mjd
+    """
+    return Time(isotime, format="iso", scale="utc").mjd
+
+
 def short_time(time):
     """
     Better readable time - remove subseconds
