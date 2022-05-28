@@ -7,7 +7,7 @@ from tqdm import tqdm
 from astropy.time import Time
 from astropy import units as u
 from ztf_plan_obs.plan import PlanObservation
-from ztf_plan_obs.plan import (
+from ztf_plan_obs.utils import (
     round_time,
     short_time,
     isotime_delta_to_seconds,

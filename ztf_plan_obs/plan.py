@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # Author: Simeon Reusch (simeon.reusch@desy.de)
-# GCN parsing code partially by Rober Stein (robert.stein@desy.de)
+# GCN parsing code partially by Robert Stein (robert.stein@desy.de)
 # License: BSD-3-Clause
 
 import time, os, warnings, typing
@@ -18,7 +18,7 @@ from astroplan.plots import plot_finder_image
 from datetime import datetime
 from astroplan.plots import plot_airmass, plot_altitude
 from ztfquery import fields, query
-from ztf_plan_obs import gcn_parser
+from ztf_plan_obs import gcn_parser, utils
 from shapely.geometry import Polygon
 
 icecube = ["IceCube", "IC", "icecube", "ICECUBE", "Icecube"]
@@ -141,7 +141,7 @@ class PlanObservation:
                     self.datasource = f"GCN Notice (Rev. {revision})\n"
 
         elif ra is None and self.alertsource in ztf:
-            if is_ztf_name(name):
+            if utils.is_ztf_name(name):
                 print(f"{name} is a ZTF name. Looking in Fritz database for ra/dec")
                 from ztf_plan_obs.fritzconnector import FritzInfo
 
@@ -247,7 +247,7 @@ class PlanObservation:
 
             if distance_to_morning < distance_to_evening:
                 if "g" in self.bands:
-                    self.g_band_recommended_time_start = round_time(
+                    self.g_band_recommended_time_start = utils.round_time(
                         min_airmass_time - self.observationlength * u.s - 0.5 * u.hour
                     )
                     self.g_band_recommended_time_end = (
@@ -255,7 +255,7 @@ class PlanObservation:
                         + self.observationlength * u.s
                     )
                 if "r" in self.bands:
-                    self.r_band_recommended_time_start = round_time(
+                    self.r_band_recommended_time_start = utils.round_time(
                         min_airmass_time - self.observationlength * u.s
                     )
                     self.r_band_recommended_time_end = (
@@ -265,7 +265,7 @@ class PlanObservation:
 
             else:
                 if "g" in self.bands:
-                    self.g_band_recommended_time_start = round_time(
+                    self.g_band_recommended_time_start = utils.round_time(
                         min_airmass_time + self.observationlength * u.s + 0.5 * u.hour
                     )
                     self.g_band_recommended_time_end = (
@@ -273,7 +273,7 @@ class PlanObservation:
                         + self.observationlength * u.s
                     )
                 if "r" in self.bands:
-                    self.r_band_recommended_time_start = round_time(
+                    self.r_band_recommended_time_start = utils.round_time(
                         min_airmass_time + self.observationlength * u.s
                     )
                     self.r_band_recommended_time_end = (
@@ -308,9 +308,9 @@ class PlanObservation:
             if self.observable and not self.multiday:
                 summarytext += "Recommended observation times:\n"
                 if "g" in self.bands:
-                    gbandtext = f"g-band: {short_time(self.g_band_recommended_time_start)} - {short_time(self.g_band_recommended_time_end)} [UTC]"
+                    gbandtext = f"g-band: {utils.short_time(self.g_band_recommended_time_start)} - {utils.short_time(self.g_band_recommended_time_end)} [UTC]"
                 if "r" in self.bands:
-                    rbandtext = f"r-band: {short_time(self.r_band_recommended_time_start)} - {short_time(self.r_band_recommended_time_end)} [UTC]"
+                    rbandtext = f"r-band: {utils.short_time(self.r_band_recommended_time_start)} - {utils.short_time(self.r_band_recommended_time_end)} [UTC]"
 
                 if (
                     "g" in bands
@@ -661,77 +661,6 @@ class PlanObservation:
             warnings.simplefilter("ignore")
             altitude = 1.0 / np.cos(np.radians(90 - airmass))
         return altitude
-
-
-def is_ztf_name(name):
-    """
-    Checks if a string adheres to the ZTF naming scheme
-    """
-    return re.match("^ZTF[1-2]\d[a-z]{7}$", name)
-
-
-def is_icecube_name(name):
-    """
-    Checks if a string adheres to the IceCube naming scheme
-    (e.g. IC201021B)
-    """
-    return re.match(
-        "^IC((\d{2}((0[13578]|1[02])(0[1-9]|[12]\d|3[01])|(0[13456789]|1[012])(0[1-9]|[12]\d|30)|02(0[1-9]|1\d|2[0-8])))|([02468][048]|[13579][26])0229)[a-zA-Z]$",
-        name,
-    )
-
-
-def round_time(time):
-    """
-    Better readable time - round to next minute
-    """
-    secs = float(str(time)[-6:])
-    if secs < 30:
-        time_rounded = time - secs * u.s
-    else:
-        time_rounded = time + (60 - secs) * u.s
-    return time_rounded
-
-
-def mjd_delta_to_seconds(mjd_start, mjd_end):
-    """
-    Convert t_end - t_start (duration of obs)
-    given in mjd into a time delta in seconds
-    """
-    return round((mjd_end - mjd_start) * 86400)
-
-
-def isotime_delta_to_seconds(isotime_start, isotime_end):
-    """
-    Convert t_end - t_start (duration of obs) given in iso-time
-    into a time delta in seconds
-    """
-
-    mjd_start = isotime_to_mjd(isotime_start)
-    mjd_end = isotime_to_mjd(isotime_end)
-
-    return round((mjd_end - mjd_start) * 86400)
-
-
-def isotime_to_mjd(isotime: str):
-    """
-    Convert time in iso-format to mjd
-    """
-    return Time(isotime, format="iso", scale="utc").mjd
-
-
-def mjd_to_isotime(mjd: float):
-    """
-    Convert time in mjd to iso-format
-    """
-    return Time(mjd, format="mjd", scale="utc").iso
-
-
-def short_time(time):
-    """
-    Better readable time - remove subseconds
-    """
-    return str(time)[:-4]
 
 
 class ParsingError(Exception):

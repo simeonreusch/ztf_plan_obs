@@ -237,7 +237,7 @@ def message(payload):
                         message += f" Chosen site: {site}"
 
             if ra is None:
-                from ztf_plan_obs.plan import is_icecube_name, is_ztf_name
+                from ztf_plan_obs.utils import is_icecube_name, is_ztf_name
 
                 if is_icecube_name(name):
                     alertsource = "icecube"
