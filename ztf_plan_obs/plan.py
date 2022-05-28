@@ -624,6 +624,7 @@ class PlanObservation:
             outpath_png = os.path.join(self.name, f"{self.name}_grid_{f}.png")
 
             fig.savefig(outpath_png, dpi=300)
+            plt.close()
 
         self.coverage = coverage
 
