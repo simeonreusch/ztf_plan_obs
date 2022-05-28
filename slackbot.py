@@ -2,7 +2,8 @@
 # Author: Simeon Reusch (simeon.reusch@desy.de)
 # License: BSD-3-Clause
 
-from ztf_plan_obs.plan import PlanObservation, AirmassError, ParsingError, is_ztf_name
+from ztf_plan_obs.plan import PlanObservation, AirmassError, ParsingError
+from ztf_plan_obs.utils import is_ztf_name
 from ztf_plan_obs.multiday_plan import MultiDayObservation
 from ztf_plan_obs.api import Queue
 import matplotlib.pyplot as plt
