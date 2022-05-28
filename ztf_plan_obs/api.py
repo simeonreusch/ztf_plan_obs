@@ -124,10 +124,19 @@ class Queue:
         """
         Submit the queue of triggers via the Kowalski API
         """
+        results = []
         for i, trigger in self.queue.items():
-            self.kowalski.api(method="put", endpoint="/api/triggers/ztf", data=trigger)
+            res = self.kowalski.api(
+                method="put", endpoint="/api/triggers/ztf", data=trigger
+            )
+            results.append(res)
+            if res["status"] != "success":
+                err = "something went wrong with submitting."
+                raise APIError(err)
 
         print(f"Submitted {len(self.queue)} triggers to Kowalski.")
+
+        return results
 
     def delete_trigger(self, trigger_name) -> None:
         """
@@ -135,4 +144,10 @@ class Queue:
         """
         req = {"user": self.user, "queue_name": trigger_name}
 
-        self.kowalski.api(method="delete", endpoint="/api/triggers/ztf", data=req)
+        res = self.kowalski.api(method="delete", endpoint="/api/triggers/ztf", data=req)
+
+        if res["status"] != "success":
+            err = "something went wrong with deleting the trigger."
+            raise APIError(err)
+
+        return res

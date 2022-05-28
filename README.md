@@ -100,7 +100,6 @@ q.add_trigger_to_queue(
     exposure_time=300,
 )
 
-print(q.queue)
 q.submit_queue()
 
 # Now we verify that our trigger has been successfully submitted
@@ -118,8 +117,5 @@ q = Queue(user="yourname")
 
 trigger_name = "ToO_IC220513A_test"
 
-res = delete_request(trigger_name=trigger_name)
-
-# Now we check if it's gone
-print(res)
+res = q.delete_trigger(trigger_name=trigger_name)
 ```
