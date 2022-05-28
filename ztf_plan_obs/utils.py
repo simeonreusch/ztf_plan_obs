@@ -68,7 +68,7 @@ def isotime_to_mjd(isotime: str):
     """
     Convert time in iso-format to mjd
     """
-    return Time(isotime, format="iso", scale="utc").mjd
+    return float(Time(isotime, format="iso", scale="utc").mjd)
 
 
 def mjd_to_isotime(mjd: float):

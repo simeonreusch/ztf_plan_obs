@@ -555,7 +555,7 @@ class PlanObservation:
         for f in mt.field.unique():
             d = {k: k in mt["filtercode"].values for k in ["zg", "zr", "zi"]}
             if d["zg"] == True and d["zr"] == True:
-                fieldids_ref.append(f)
+                fieldids_ref.append(int(f))
 
         print(f"Fields that contain target: {fieldids}")
         print(f"Of these have a reference: {fieldids_ref}")

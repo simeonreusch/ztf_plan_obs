@@ -127,7 +127,7 @@ class Queue:
         for i, trigger in self.queue.items():
             print(trigger)
 
-        # self.kowalski.api(method="put", endpoint="/api/triggers/ztf", data=trigger)
+        self.kowalski.api(method="put", endpoint="/api/triggers/ztf", data=trigger)
         print(f"Submitted {len(self.queue)} triggers to Kowalski.")
 
     def delete_trigger(self, trigger_name) -> None:
@@ -136,4 +136,4 @@ class Queue:
         """
         req = {"user": self.user, "queue_name": trigger_name}
 
-        # self.kowalski.api(method="delete", endpoint="/api/triggers/ztf", data=req)
+        self.kowalski.api(method="delete", endpoint="/api/triggers/ztf", data=req)

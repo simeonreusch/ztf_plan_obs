@@ -296,6 +296,13 @@ def message(payload):
                 if parameter in fuzzy_parameters(["delete"]):
                     triggername = split_text[i + 1]
                     delete_trigger(triggername)
+                    message = (
+                        f"Deleting the following trigger from the queue:\n{triggername}"
+                    )
+                    slack_web_client.chat_postMessage(
+                        channel=channel_id,
+                        text=message,
+                    )
 
 
 if __name__ == "__main__":
