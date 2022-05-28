@@ -166,10 +166,11 @@ class MultiDayObservation:
         print(self.summarytext)
 
     def print_triggers(self):
+        bands = {1: "g", 2: "r", 3: "i"}
         message = ""
         for i, trigger in enumerate(self.triggers):
             t_start = short_time(mjd_to_isotime(trigger["mjd_start"]))
-            message += f"{t_start} // {trigger['exposure_time']} s exposure // filter={trigger['filter_id']} // field={trigger['field_id']}\n"
+            message += f"{t_start} // {trigger['exposure_time']} s exposure // filter={bands[trigger['filter_id']]} // field={trigger['field_id']}\n"
         message = message[:-1]
         print(message)
         return message
