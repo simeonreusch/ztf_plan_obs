@@ -1,4 +1,4 @@
-import os
+import os, time
 from typing import Union
 
 from penquins import Kowalski
@@ -125,9 +125,8 @@ class Queue:
         Submit the queue of triggers via the Kowalski API
         """
         for i, trigger in self.queue.items():
-            print(trigger)
+            self.kowalski.api(method="put", endpoint="/api/triggers/ztf", data=trigger)
 
-        self.kowalski.api(method="put", endpoint="/api/triggers/ztf", data=trigger)
         print(f"Submitted {len(self.queue)} triggers to Kowalski.")
 
     def delete_trigger(self, trigger_name) -> None:
