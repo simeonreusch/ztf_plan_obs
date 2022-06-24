@@ -628,9 +628,14 @@ class PlanObservation:
 
         self.coverage = coverage
 
-        max_coverage_field = max(coverage, key=coverage.get)
+        if len(self.coverage) > 0:
 
-        self.recommended_field = max_coverage_field
+            max_coverage_field = max(coverage, key=coverage.get)
+
+            self.recommended_field = max_coverage_field
+
+        else:
+            self.recommended_field = None
 
     def plot_finding_chart(self):
         """ """
