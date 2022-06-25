@@ -1,3 +1,9 @@
+#!/usr/bin/env python3
+# Authors:
+#    Robert Stein (rdstein@astro.caltech.edu)
+#    Simeon Reusch (simeon.reusch@desy.de)
+# License: BSD-3-Clause
+
 import os, time
 from typing import Union
 
@@ -151,3 +157,10 @@ class Queue:
             raise APIError(err)
 
         return res
+
+    def print(self) -> None:
+        """
+        Return the content of the queue
+        """
+        for i, trigger in self.queue.items():
+            print(trigger)
