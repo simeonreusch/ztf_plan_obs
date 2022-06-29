@@ -174,11 +174,17 @@ class PlanObservation:
             self.start_obswindow = Time(self.date + " 00:00:00.000000")
 
         else:
-            self.start_obswindow = Time(
-                str(self.now.datetime.date()) + " 00:00:00.000000"
-            )
+            # self.start_obswindow = Time(
+            #     str(self.now.datetime.date()) + " 00:00:00.000000"
+            # )
+            self.start_obswindow = Time(self.now, format="iso")
 
         self.end_obswindow = Time(self.start_obswindow.mjd + 1, format="mjd").iso
+
+        # print("start obswindow:", self.start_obswindow)
+        # print("end obswindow:", self.end_obswindow)
+
+        # quit()
 
         constraints = [
             ap.AltitudeConstraint(20 * u.deg, 90 * u.deg),
@@ -186,7 +192,7 @@ class PlanObservation:
             ap.AtNightConstraint.twilight_astronomical(),
         ]
 
-        # Obtain moon coordinates at Palomar for the full time window
+        # Obtain moon coordinates at Palomar for the full time window (default: 24 hours from running the script)
         times = Time(self.start_obswindow + np.linspace(0, 24, 1000) * u.hour)
         moon_times = Time(self.start_obswindow + np.linspace(0, 24, 50) * u.hour)
         moon_coords = []
@@ -209,17 +215,40 @@ class PlanObservation:
         self.twilight_morning = self.site.twilight_morning_astronomical(
             Time(self.start_obswindow), which="next"
         )
+        print("time now:", Time(self.now, format="iso").mjd)
+        print("twilight evening:", self.twilight_evening)
+        print("twilight morning:", self.twilight_morning)
+
+        """
+        Check if if we are before morning or before evening
+        in_night = True means it's currently dark at the site
+        and morning comes before evening.
+        """
+        if self.twilight_evening - self.twilight_morning > 0:
+            print("lol")
+            self.in_night = True
+            # self.observation_window = []
+        else:
+            self.in_night = False
 
         indices_included = []
         airmasses_included = []
         times_included = []
 
         for index, t_mjd in enumerate(times.mjd):
-            if (
-                t_mjd > self.twilight_evening.mjd + 0.01
-                and t_mjd < self.twilight_morning.mjd - 0.01
-            ):
-                if airmass[index] < 2.0:
+            if self.in_night:
+                if (
+                    (t_mjd < self.twilight_morning.mjd - 0.03)
+                    or (t_mjd > self.twilight_evening.mjd + 0.03)
+                ) and airmass[index] < 2.0:
+                    indices_included.append(index)
+                    airmasses_included.append(airmass[index])
+                    times_included.append(times[index])
+            else:
+                if (
+                    (t_mjd > self.twilight_evening.mjd + 0.01)
+                    and (t_mjd < self.twilight_morning.mjd - 0.01)
+                ) and airmass[index] < 2.0:
                     indices_included.append(index)
                     airmasses_included.append(airmass[index])
                     times_included.append(times[index])
@@ -343,40 +372,76 @@ class PlanObservation:
         self.summarytext = summarytext
 
     def plot_target(self):
-        """ """
+        """
+        Plot the observation window, including moon, altitude
+        constraint and target on sky
+        """
+        now_mjd = Time(self.now, format="iso").mjd
+
         if self.date is not None:
             _date = self.date + " 12:00:00.000000"
-            time = _date
+            time_center = _date
         else:
-            time = self.now
+            time_center = Time(now_mjd + 0.45, format="mjd").iso
 
         ax = plot_altitude(
             self.target,
             self.site,
-            time,
-            # brightness_shading=True,
+            time_center,
             min_altitude=10,
         )
 
-        ax.axvspan(
-            self.twilight_evening.plot_date,
-            self.twilight_morning.plot_date,
-            alpha=0.2,
-            color="gray",
-        )
+        if self.in_night:
+            ax.axvspan(
+                (self.now - 0.05).plot_date,
+                self.twilight_morning.plot_date,
+                alpha=0.2,
+                color="gray",
+            )
+            ax.axvspan(
+                self.twilight_evening.plot_date,
+                (self.now + 0.95).plot_date,
+                alpha=0.2,
+                color="gray",
+            )
+            duration1 = (self.twilight_morning - (self.now - 0.05)) / 2
+            duration2 = (self.twilight_evening - (self.now + 0.95)) / 2
+            nightmarker1 = (self.twilight_morning - duration1).plot_date
+            nightmarker2 = (self.twilight_evening - duration2).plot_date
+            ax.annotate(
+                "Night",
+                xy=[nightmarker1, 85],
+                color="dimgray",
+                ha="center",
+                fontsize=12,
+            )
+            ax.annotate(
+                "Night",
+                xy=[nightmarker2, 85],
+                color="dimgray",
+                ha="center",
+                fontsize=12,
+            )
+        else:
+            ax.axvspan(
+                self.twilight_evening.plot_date,
+                self.twilight_morning.plot_date,
+                alpha=0.2,
+                color="gray",
+            )
 
-        midnight = min(self.twilight_evening, self.twilight_morning) + 0.5 * (
-            max(self.twilight_evening, self.twilight_morning)
-            - min(self.twilight_evening, self.twilight_morning)
-        )
+            midnight = min(self.twilight_evening, self.twilight_morning) + 0.5 * (
+                max(self.twilight_evening, self.twilight_morning)
+                - min(self.twilight_evening, self.twilight_morning)
+            )
 
-        ax.annotate(
-            "Night",
-            xy=[midnight.plot_date, 85],
-            color="dimgray",
-            ha="center",
-            fontsize=12,
-        )
+            ax.annotate(
+                "Night",
+                xy=[midnight.plot_date, 85],
+                color="dimgray",
+                ha="center",
+                fontsize=12,
+            )
 
         # Plot a vertical line for the current time
         ax.axvline(Time(self.now).plot_date, color="black", label="now", ls="dotted")
@@ -399,10 +464,10 @@ class PlanObservation:
             fontsize=8,
         )
 
-        if self.date is not None:
-            ax.set_xlabel(f"{self.date} [UTC]")
-        else:
-            ax.set_xlabel(f"{self.now.datetime.date()} [UTC]")
+        # if self.date is not None:
+        #     ax.set_xlabel(f"{self.date} [UTC]")
+        # else:
+        #     ax.set_xlabel(f"{self.now.datetime.date()} [UTC]")
         plt.grid(True, color="gray", linestyle="dotted", which="both", alpha=0.5)
 
         if self.site.name == "Palomar":

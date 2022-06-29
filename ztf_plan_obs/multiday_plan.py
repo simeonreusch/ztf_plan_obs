@@ -42,23 +42,43 @@ class MultiDayObservation:
         today = date.today()
         now = datetime.now()
 
+        if self.ra is None:
+            plan_initial = PlanObservation(name=name, alertsource="icecube")
+        else:
+            plan_initial = PlanObservation(name=name, ra=self.ra, dec=self.dec)
+
         if startdate is None:
-            now_astropy = Time(str(now), format="iso", scale="utc", out_subfmt="date")
-            next_days = [(now_astropy + i - 1).value for i in NIGHTS]
+            first_obs = plan_initial.g_band_recommended_time_start
+            first_obs_day = Time(
+                first_obs, format="iso", scale="utc", out_subfmt="date"
+            )
+            next_days = [(first_obs_day + i - 1).value for i in NIGHTS]
         else:
             startdate_astropy = Time(
                 str(startdate), format="iso", scale="utc", out_subfmt="date"
             )
             next_days = [(startdate_astropy + i - 1).value for i in NIGHTS]
 
-        if self.ra is None:
-            plan_initial = PlanObservation(
-                name=name, date=str(today), alertsource="icecube"
-            )
-        else:
-            plan_initial = PlanObservation(
-                name=name, date=str(today), ra=self.ra, dec=self.dec
-            )
+        # if startdate is None:
+        #     now_astropy = Time(str(now), format="iso", scale="utc", out_subfmt="date")
+        #     next_days = [(now_astropy + i - 1).value for i in NIGHTS]
+        # else:
+        #     startdate_astropy = Time(
+        #         str(startdate), format="iso", scale="utc", out_subfmt="date"
+        #     )
+        #     next_days = [(startdate_astropy + i - 1).value for i in NIGHTS]
+
+        # if self.ra is None:
+        #     plan_initial = PlanObservation(
+        #         name=name, date=str(today), alertsource="icecube"
+        #     )
+        # else:
+        #     plan_initial = PlanObservation(
+        #         name=name, date=str(today), ra=self.ra, dec=self.dec
+        #     )
+
+        # print(plan_initial.g_band_recommended_time_start)
+        # quit()
 
         ra = plan_initial.ra
         dec = plan_initial.dec
