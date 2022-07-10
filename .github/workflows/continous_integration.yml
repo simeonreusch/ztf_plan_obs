@@ -56,7 +56,8 @@ jobs:
           ZTFDATA: ./
         run: |
           coverage run -m unittest discover tests/
-          coverage combine
+
+# coverage combine
 
       #- name: Run Coveralls
       #  env:
