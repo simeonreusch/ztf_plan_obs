@@ -49,6 +49,8 @@ class TestPlan(unittest.TestCase):
             name=neutrino_name, startdate=date, alertsource="icecube"
         )
         plan.print_plan()
+        plan.print_triggers()
+
         summary = plan.summarytext
         summary_expected = "\nYour multi-day observation plan for IC220501A\n-------------------------------------------------\ng-band observations\nNight 1 2022-05-03 10:35:00 - 2022-05-03 10:40:00\nNight 2 2022-05-04 10:38:00 - 2022-05-04 10:38:30\nNight 3 2022-05-05 10:37:00 - 2022-05-05 10:37:30\nNight 5 2022-05-07 10:35:00 - 2022-05-07 10:35:30\nNight 7 2022-05-09 10:33:00 - 2022-05-09 10:33:30\nNight 9 2022-05-11 10:30:00 - 2022-05-11 10:30:30\n-------------------------------------------------\n\n-------------------------------------------------\nr-band observations\nNight 1 2022-05-03 11:05:00 - 2022-05-03 11:10:00\nNight 9 2022-05-11 11:00:00 - 2022-05-11 11:00:30\n-------------------------------------------------\n\n"
 
