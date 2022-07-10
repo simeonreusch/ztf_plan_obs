@@ -15,25 +15,25 @@ class TestPlan(unittest.TestCase):
 
         self.max_distance_diff_arcsec = 2
 
-    # def test_plan(self):
+    def test_plan(self):
 
-    #     self.logger.info("\n\n Testing Plan \n\n")
+        self.logger.info("\n\n Testing Plan \n\n")
 
-    #     neutrino_name = "IC220624A"
-    #     date = "2022-06-24"
+        neutrino_name = "IC220624A"
+        date = "2022-06-24"
 
-    #     self.logger.info(f"Creating an observation plan for neutrino {neutrino_name}")
-    #     plan = PlanObservation(name=neutrino_name, date=date, alertsource="icecube")
-    #     plan.plot_target()  # Plots the observing conditions
-    #     plan.request_ztf_fields()
+        self.logger.info(f"Creating an observation plan for neutrino {neutrino_name}")
+        plan = PlanObservation(name=neutrino_name, date=date, alertsource="icecube")
+        plan.plot_target()  # Plots the observing conditions
+        plan.request_ztf_fields()
 
-    #     recommended_field = plan.recommended_field
-    #     recommended_field_expected = 720
+        recommended_field = plan.recommended_field
+        recommended_field_expected = 720
 
-    #     self.logger.info(
-    #         f"recommended field: {recommended_field}, expected {recommended_field_expected}"
-    #     )
-    #     self.assertEqual(recommended_field, recommended_field_expected)
+        self.logger.info(
+            f"recommended field: {recommended_field}, expected {recommended_field_expected}"
+        )
+        self.assertEqual(recommended_field, recommended_field_expected)
 
     def test_multiday_plan(self):
 

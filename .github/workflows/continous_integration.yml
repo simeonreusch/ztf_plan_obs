@@ -48,6 +48,7 @@ jobs:
       # Runs a set of commands using the runners shell
       - name: Test the code
         env:
+          KOWALSKI_HOST: ${{ secrets.kowalski_host }}
           KOWALSKI_API_TOKEN: ${{ secrets.kowalski_api_token }}
           IRSA_USER: ${{ secrets.irsa_user }}
           IRSA_PASSWORD: ${{ secrets.irsa_password }}
