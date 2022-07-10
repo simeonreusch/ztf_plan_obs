@@ -24,6 +24,7 @@ if __name__ == "__main__":
     install_requires = [
         "astropy",
         "astroquery",
+        "coveralls",
         "numpy",
         "astroplan>=0.7",
         "pandas",
