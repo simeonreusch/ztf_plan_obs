@@ -235,3 +235,15 @@ class TestPlan(unittest.TestCase):
         ]
 
         self.assertEqual(triggers_summary, triggers_summary_expected)
+
+        q.submit_queue()
+
+        current_too_queue = q.get_too_queues()
+        trigger_in_q = current_too_queue["data"][-1]["queue_name"]
+        trigger_in_q_expected = "ToO_IC220501A_7"
+
+        q.delete_queue()
+
+        current_too_queue = q.get_too_queues()
+
+        self.assertEqual(trigger_in_q, trigger_in_q_expected)

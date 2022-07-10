@@ -144,6 +144,14 @@ class Queue:
 
         return results
 
+    def delete_queue(self) -> None:
+        """
+        Delete all triggers of the queue that have been submitted to Kowalski
+        """
+        for i, trigger in self.queue.items():
+            req = {"user": self.user, "queue_name": trigger["queue_name"]}
+            self.kowalski.api(method="delete", endpoint="/api/triggers/ztf", data=req)
+
     def delete_trigger(self, trigger_name) -> None:
         """
         Delete a trigger that has been submitted
@@ -170,3 +178,9 @@ class Queue:
         Print the content of the queue
         """
         return [t for t in self.queue.items()]
+
+    def __del__(self):
+        """
+        Close the connection
+        """
+        self.kowalski.close()
