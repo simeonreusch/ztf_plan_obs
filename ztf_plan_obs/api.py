@@ -160,7 +160,13 @@ class Queue:
 
     def print(self) -> None:
         """
-        Return the content of the queue
+        Print the content of the queue
         """
         for i, trigger in self.queue.items():
             print(trigger)
+
+    def get_triggers(self) -> list:
+        """
+        Print the content of the queue
+        """
+        return [t for t in self.queue.items()]

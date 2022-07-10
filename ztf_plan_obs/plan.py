@@ -175,17 +175,9 @@ class PlanObservation:
             self.start_obswindow = Time(self.date + " 00:00:00.000000")
 
         else:
-            # self.start_obswindow = Time(
-            #     str(self.now.datetime.date()) + " 00:00:00.000000"
-            # )
             self.start_obswindow = Time(self.now, format="iso")
 
         self.end_obswindow = Time(self.start_obswindow.mjd + 1, format="mjd").iso
-
-        # print("start obswindow:", self.start_obswindow)
-        # print("end obswindow:", self.end_obswindow)
-
-        # quit()
 
         constraints = [
             ap.AltitudeConstraint(20 * u.deg, 90 * u.deg),
@@ -216,9 +208,6 @@ class PlanObservation:
         self.twilight_morning = self.site.twilight_morning_astronomical(
             Time(self.start_obswindow), which="next"
         )
-        print("time now:", Time(self.now, format="iso").mjd)
-        print("twilight evening:", self.twilight_evening)
-        print("twilight morning:", self.twilight_morning)
 
         """
         Check if if we are before morning or before evening
@@ -226,9 +215,7 @@ class PlanObservation:
         and morning comes before evening.
         """
         if self.twilight_evening - self.twilight_morning > 0:
-            print("lol")
             self.in_night = True
-            # self.observation_window = []
         else:
             self.in_night = False
 
