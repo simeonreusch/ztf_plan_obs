@@ -3,7 +3,7 @@ Toolset for planning and triggering observations with ZTF. GCN parsing is curren
 
 It checks if the object is observable with a maximum airmass on a given date, plots the airmass vs. time, computes two optimal (minimal airmass at night) observations of 300s in g- and r and generate the ZTF field plots for all fields having a reference. There is also the option to create a longer (multiday) observation plan.
 
-[![CI](https://github.com/simeonreusch/ztf_plan_obs/workflows/continous_integration.yml/badge.svg)](https://github.com/desy-multimessenger/nuztf/actions/workflows/continous_integration.yml)
+[![CI](https://github.com/simeonreusch/ztf_plan_obs/actions/workflows/continous_integration.yml/badge.svg)](https://github.com/simeonreusch/ztf_plan_obs/actions/workflows/continous_integration.yml)
 [![Coverage Status](https://coveralls.io/repos/github/simeonreusch/ztf_plan_obs/badge.svg?branch=main)](https://coveralls.io/github/simeonreusch/ztf_plan_obs?branch=main)
 
 # Requirements
