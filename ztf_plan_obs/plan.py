@@ -18,8 +18,9 @@ from astroplan.plots import plot_finder_image
 from datetime import datetime
 from astroplan.plots import plot_airmass, plot_altitude
 from ztfquery import fields, query
-from ztf_plan_obs import gcn_parser, utils
 from shapely.geometry import Polygon
+
+from ztf_plan_obs import gcn_parser, utils
 
 icecube = ["IceCube", "IC", "icecube", "ICECUBE", "Icecube"]
 ztf = ["ZTF", "ztf"]

@@ -1,6 +1,7 @@
 import unittest
 import logging
 
+# from ztf_plan_obs import credentials
 from ztf_plan_obs.plan import PlanObservation
 from ztf_plan_obs.multiday_plan import MultiDayObservation
 from ztf_plan_obs.api import Queue
@@ -21,7 +22,7 @@ class TestPlan(unittest.TestCase):
         neutrino_name = "IC220624A"
         date = "2022-06-24"
 
-        self.logger.info(f"creatin an observation plan for neutrino {neutrino_name}")
+        self.logger.info(f"Creating an observation plan for neutrino {neutrino_name}")
         plan = PlanObservation(name=neutrino_name, date=date, alertsource="icecube")
         plan.plot_target()  # Plots the observing conditions
         plan.request_ztf_fields()
