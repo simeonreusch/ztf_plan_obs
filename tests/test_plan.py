@@ -1,7 +1,7 @@
 import unittest
 import logging
 
-# from ztf_plan_obs import credentials
+from ztf_plan_obs import credentials
 from ztf_plan_obs.plan import PlanObservation
 from ztf_plan_obs.multiday_plan import MultiDayObservation
 from ztf_plan_obs.api import Queue
