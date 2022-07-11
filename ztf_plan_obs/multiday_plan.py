@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 import matplotlib.pyplot as plt
-import os
+import os, logging
 from datetime import datetime, date
 from matplotlib.backends.backend_pdf import PdfPages
 from tqdm import tqdm
@@ -14,6 +14,8 @@ from ztf_plan_obs.utils import (
     isotime_to_mjd,
     mjd_to_isotime,
 )
+
+logger = logging.getLogger(__name__)
 
 NIGHTS = [1, 2, 3, 5, 7, 9]
 SHORT_NIGHTS = NIGHTS[1:]
@@ -75,6 +77,7 @@ class MultiDayObservation:
 
         pdf_outfile = os.path.join(name, f"{name}_multiday.pdf")
 
+        logger.info("Creating pdf")
         with PdfPages(pdf_outfile) as pdf:
             for i, day in enumerate(tqdm(next_days)):
                 if NIGHTS[i] not in SHORT_NIGHTS:

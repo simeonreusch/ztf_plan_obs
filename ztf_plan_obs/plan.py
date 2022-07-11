@@ -3,7 +3,7 @@
 # GCN parsing code partially by Robert Stein (robert.stein@desy.de)
 # License: BSD-3-Clause
 
-import time, os, warnings, typing
+import time, os, warnings, typing, logging
 import astropy
 from astropy.time import Time
 from astropy import units as u
@@ -24,6 +24,8 @@ from ztf_plan_obs import gcn_parser, utils
 
 icecube = ["IceCube", "IC", "icecube", "ICECUBE", "Icecube"]
 ztf = ["ZTF", "ztf"]
+
+logger = logging.getLogger(__name__)
 
 
 class PlanObservation:
@@ -70,7 +72,7 @@ class PlanObservation:
 
         if ra is None and self.alertsource in icecube:
             if verbose:
-                print("Parsing an IceCube alert")
+                logger.info("Parsing an IceCube alert")
 
             # Check if request is archival:
             archive, latest_archive_no = gcn_parser.get_gcn_circulars_archive()
@@ -81,13 +83,11 @@ class PlanObservation:
             latest_archival = max(archival_dates)
             this_alert_date = int(self.name[2:-1])
             if this_alert_date > latest_archival:
-                if verbose:
-                    print(
-                        "Alert too new, no GCN circular available yet. Using latest GCN notice"
-                    )
+                logger.info(
+                    "Alert too new, no GCN circular available yet. Using latest GCN notice"
+                )
             else:
-                if verbose:
-                    print("Alert info should be in GCN circular archive")
+                logger.info("Alert info should be in GCN circular archive")
                 self.search_full_archive = True
 
             if self.search_full_archive:
@@ -109,8 +109,8 @@ class PlanObservation:
                 self.arrivaltime = gcn_info["time"]
 
             else:
-                if verbose:
-                    print("No archival GCN circular found. Using newest notice!")
+                logger.info("No archival GCN circular found. Using newest notice!")
+
                 (
                     ra_notice,
                     dec_notice,
@@ -143,7 +143,9 @@ class PlanObservation:
 
         elif ra is None and self.alertsource in ztf:
             if utils.is_ztf_name(name):
-                print(f"{name} is a ZTF name. Looking in Fritz database for ra/dec")
+                logger.info(
+                    f"{name} is a ZTF name. Looking in Fritz database for ra/dec"
+                )
                 from ztf_plan_obs.fritzconnector import FritzInfo
 
                 fritz = FritzInfo([name])
@@ -156,7 +158,7 @@ class PlanObservation:
                 if np.isnan(self.ra):
                     raise ValueError("Object apparently not found on Fritz")
 
-                print("\nFound ZTF object information on Fritz")
+                logger.info("\nFound ZTF object information on Fritz")
         elif ra is None:
             raise ValueError("Please enter ra and dec")
 
@@ -352,8 +354,7 @@ class PlanObservation:
                 for item in bandtexts:
                     summarytext += item
 
-        if verbose:
-            print(summarytext)
+        logger.info(summarytext)
 
         if not os.path.exists(self.name):
             os.makedirs(self.name)
@@ -575,7 +576,7 @@ class PlanObservation:
                 self.gcn_nr = archival_number
                 self.found_in_archive = True
                 self.datasource = f"GCN Circular {self.gcn_nr}\n"
-                print("Archival data found, using these.")
+                logger.info("Archival data found, using these.")
 
     def request_ztf_fields(self, plot=True) -> list:
         """
@@ -602,7 +603,7 @@ class PlanObservation:
             for f in fieldids[1:]:
                 querystring += f" OR field={f}"
 
-        print(
+        logger.info(
             f"Checking IPAC if references are available in g- and r-band for fields {fieldids}"
         )
 
@@ -614,8 +615,8 @@ class PlanObservation:
             if d["zg"] == True and d["zr"] == True:
                 fieldids_ref.append(int(f))
 
-        print(f"Fields that contain target: {fieldids}")
-        print(f"Of these have a reference: {fieldids_ref}")
+        logger.info(f"Fields that contain target: {fieldids}")
+        logger.info(f"Of these have a reference: {fieldids_ref}")
 
         self.fieldids_ref = fieldids_ref
 

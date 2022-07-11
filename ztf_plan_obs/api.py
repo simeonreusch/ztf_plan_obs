@@ -4,10 +4,12 @@
 #    Simeon Reusch (simeon.reusch@desy.de)
 # License: BSD-3-Clause
 
-import os, time
+import os, time, logging
 from typing import Union
 
 from penquins import Kowalski
+
+logger = logging.getLogger(__name__)
 
 
 class APIError(Exception):
@@ -51,6 +53,7 @@ class Queue:
         Get all the queues
         """
         res = self.kowalski.api("get", "/api/triggers/ztf")
+        logger.debug(res)
         if res["status"] != "success":
             err = f"API call failed with status '{res['status']}'' and message '{res['message']}''"
             raise APIError(err)
@@ -65,6 +68,7 @@ class Queue:
         Get all the queues and return ToO triggers only
         """
         res = self.get_all_queues()
+        logger.debug(res)
         res["data"] = [x for x in res["data"] if x["is_TOO"]]
 
         if names_only:
@@ -135,11 +139,13 @@ class Queue:
             res = self.kowalski.api(
                 method="put", endpoint="/api/triggers/ztf", data=trigger
             )
+            logger.debug(res)
+
             if res["status"] != "success":
                 err = "something went wrong with submitting."
                 raise APIError(err)
 
-        print(f"Submitted {len(self.queue)} triggers to Kowalski.")
+        logger.info(f"Submitted {len(self.queue)} triggers to Kowalski.")
 
         return results
 
@@ -154,7 +160,7 @@ class Queue:
             res = self.kowalski.api(
                 method="delete", endpoint="/api/triggers/ztf", data=req
             )
-            print(res)
+            logger.debug(res)
             results.update({i: res})
 
         for i, trigger in self.queue.items():
@@ -171,6 +177,8 @@ class Queue:
         req = {"user": self.user, "queue_name": trigger_name}
 
         res = self.kowalski.api(method="delete", endpoint="/api/triggers/ztf", data=req)
+
+        logger.debug(res)
 
         if res["status"] != "success":
             err = "something went wrong with deleting the trigger."
