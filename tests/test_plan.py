@@ -5,6 +5,7 @@ from ztf_plan_obs import credentials
 from ztf_plan_obs.plan import PlanObservation
 from ztf_plan_obs.multiday_plan import MultiDayObservation
 from ztf_plan_obs.api import Queue
+from ztf_plan_obs.gcn_parser import parse_latest_gcn_notice
 
 
 class TestPlan(unittest.TestCase):
@@ -15,25 +16,33 @@ class TestPlan(unittest.TestCase):
 
         self.max_distance_diff_arcsec = 2
 
-    def test_plan(self):
+    # def test_gcn_parser(self):
 
-        self.logger.info("\n\n Testing Plan \n\n")
+    #     self.logger.info("\n\n Testing GCN parser \n\n")
 
-        neutrino_name = "IC220624A"
-        date = "2022-06-24"
+    #     latest = parse_latest_gcn_notice()
 
-        self.logger.info(f"Creating an observation plan for neutrino {neutrino_name}")
-        plan = PlanObservation(name=neutrino_name, date=date, alertsource="icecube")
-        plan.plot_target()  # Plots the observing conditions
-        plan.request_ztf_fields()
+    #     self.assertGreater(len(latest), 0)
 
-        recommended_field = plan.recommended_field
-        recommended_field_expected = 720
+    # def test_plan(self):
 
-        self.logger.info(
-            f"recommended field: {recommended_field}, expected {recommended_field_expected}"
-        )
-        self.assertEqual(recommended_field, recommended_field_expected)
+    #     self.logger.info("\n\n Testing Plan \n\n")
+
+    #     neutrino_name = "IC220624A"
+    #     date = "2022-06-24"
+
+    #     self.logger.info(f"Creating an observation plan for neutrino {neutrino_name}")
+    #     plan = PlanObservation(name=neutrino_name, date=date, alertsource="icecube")
+    #     plan.plot_target()  # Plots the observing conditions
+    #     plan.request_ztf_fields()
+
+    #     recommended_field = plan.recommended_field
+    #     recommended_field_expected = 720
+
+    #     self.logger.info(
+    #         f"recommended field: {recommended_field}, expected {recommended_field_expected}"
+    #     )
+    #     self.assertEqual(recommended_field, recommended_field_expected)
 
     def test_multiday_plan(self):
 
@@ -241,11 +250,15 @@ class TestPlan(unittest.TestCase):
         q.submit_queue()
 
         current_too_queue = q.get_too_queues()
-        trigger_in_q = current_too_queue["data"][-1]["queue_name"]
-        trigger_in_q_expected = "ToO_IC220501A_7"
+
+        trigger_in_q_list = [
+            current_too_queue["data"][i]["queue_name"] for i in range(8)
+        ]
+        trigger_in_q_expected_list = [f"ToO_IC220501A_{i}" for i in range(8)]
 
         q.delete_queue()
 
         current_too_queue = q.get_too_queues()
 
-        self.assertEqual(trigger_in_q, trigger_in_q_expected)
+        for t in trigger_in_q_list:
+            self.assertIn(t, trigger_in_q_expected_list)
