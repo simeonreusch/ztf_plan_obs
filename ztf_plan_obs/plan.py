@@ -377,25 +377,28 @@ class PlanObservation:
             self.site,
             time_center,
             min_altitude=10,
+            style_kwargs={"fmt": "-"},
         )
 
         if self.in_night:
             ax.axvspan(
-                (self.now - 0.05).plot_date,
+                (self.now - 0.05 * u.d).plot_date,
                 self.twilight_morning.plot_date,
                 alpha=0.2,
                 color="gray",
             )
             ax.axvspan(
                 self.twilight_evening.plot_date,
-                (self.now + 0.95).plot_date,
+                (self.now + 0.95 * u.d).plot_date,
                 alpha=0.2,
                 color="gray",
             )
-            duration1 = (self.twilight_morning - (self.now - 0.05)) / 2
-            duration2 = (self.twilight_evening - (self.now + 0.95)) / 2
+
+            duration1 = (self.twilight_morning - (self.now - 0.05 * u.d)) / 2
+            duration2 = (self.twilight_evening - (self.now + 0.95 * u.d)) / 2
             nightmarker1 = (self.twilight_morning - duration1).plot_date
             nightmarker2 = (self.twilight_evening - duration2).plot_date
+
             ax.annotate(
                 "Night",
                 xy=[nightmarker1, 85],

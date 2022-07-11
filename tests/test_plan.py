@@ -1,6 +1,8 @@
 import unittest
 import logging
 
+import matplotlib.pyplot as plt
+
 from ztf_plan_obs import credentials
 from ztf_plan_obs.plan import PlanObservation
 from ztf_plan_obs.multiday_plan import MultiDayObservation
@@ -16,37 +18,59 @@ class TestPlan(unittest.TestCase):
 
         self.max_distance_diff_arcsec = 2
 
-    # def test_gcn_parser(self):
+    def test_gcn_parser(self):
 
-    #     self.logger.info("\n\n Testing GCN parser \n\n")
+        self.logger.info("\n\n Testing GCN parser \n\n")
 
-    #     latest = parse_latest_gcn_notice()
+        latest = parse_latest_gcn_notice()
 
-    #     self.assertGreater(len(latest), 0)
+        self.logger.info(f"Length of latest GCN circular: {len(latest)}")
 
-    # def test_plan(self):
+        self.assertGreater(len(latest), 0)
 
-    #     self.logger.info("\n\n Testing Plan \n\n")
+    def test_ztf_plan(self):
 
-    #     neutrino_name = "IC220624A"
-    #     date = "2022-06-24"
+        self.logger.info("\n\n Testing ZTF Plan \n\n")
 
-    #     self.logger.info(f"Creating an observation plan for neutrino {neutrino_name}")
-    #     plan = PlanObservation(name=neutrino_name, date=date, alertsource="icecube")
-    #     plan.plot_target()  # Plots the observing conditions
-    #     plan.request_ztf_fields()
+        name = "ZTF19accdntg"
+        date = "2021-07-22"
 
-    #     recommended_field = plan.recommended_field
-    #     recommended_field_expected = 720
+        plan = PlanObservation(name=name, date=date, alertsource="ZTF")
+        plan.plot_target()
+        plan.request_ztf_fields()
 
-    #     self.logger.info(
-    #         f"recommended field: {recommended_field}, expected {recommended_field_expected}"
-    #     )
-    #     self.assertEqual(recommended_field, recommended_field_expected)
+        plt.close()
 
-    def test_multiday_plan(self):
+        recommended_field = plan.recommended_field
+        recommended_field_expected = None
 
-        self.logger.info("\n\n Testing Multiday Plan \n\n")
+        self.assertEqual(recommended_field, recommended_field_expected)
+
+    def test_icecube_plan(self):
+
+        self.logger.info("\n\n Testing IceCube Plan \n\n")
+
+        neutrino_name = "IC220624A"
+        date = "2022-06-24"
+
+        self.logger.info(f"Creating an observation plan for neutrino {neutrino_name}")
+        plan = PlanObservation(name=neutrino_name, date=date, alertsource="icecube")
+        plan.plot_target()
+        plan.request_ztf_fields()
+
+        plt.close()
+
+        recommended_field = plan.recommended_field
+        recommended_field_expected = 720
+
+        self.logger.info(
+            f"recommended field: {recommended_field}, expected {recommended_field_expected}"
+        )
+        self.assertEqual(recommended_field, recommended_field_expected)
+
+    def test_icecube_multiday_plan(self):
+
+        self.logger.info("\n\n Testing IceCube Multiday Plan \n\n")
 
         neutrino_name = "IC220501A"
         date = "2022-05-03"
@@ -57,6 +81,9 @@ class TestPlan(unittest.TestCase):
         plan = MultiDayObservation(
             name=neutrino_name, startdate=date, alertsource="icecube"
         )
+
+        plt.close()
+
         plan.print_plan()
         plan.print_triggers()
 

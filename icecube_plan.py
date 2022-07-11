@@ -18,6 +18,7 @@ plan.request_ztf_fields()  # Checks in which ZTF fields this object is observabl
 # plan.plot_finding_chart()
 plt.close()
 
+quit()
 
 observationplan = MultiDayObservation(name=name, startdate="2022-06-23")
 observationplan.print_plan()
