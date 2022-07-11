@@ -135,7 +135,6 @@ class Queue:
             res = self.kowalski.api(
                 method="put", endpoint="/api/triggers/ztf", data=trigger
             )
-            results.append(res)
             if res["status"] != "success":
                 err = "something went wrong with submitting."
                 raise APIError(err)

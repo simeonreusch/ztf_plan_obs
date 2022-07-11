@@ -18,55 +18,55 @@ class TestPlan(unittest.TestCase):
 
         self.max_distance_diff_arcsec = 2
 
-    def test_gcn_parser(self):
+    # def test_gcn_parser(self):
 
-        self.logger.info("\n\n Testing GCN parser \n\n")
+    #     self.logger.info("\n\n Testing GCN parser \n\n")
 
-        latest = parse_latest_gcn_notice()
+    #     latest = parse_latest_gcn_notice()
 
-        self.logger.info(f"Length of latest GCN circular: {len(latest)}")
+    #     self.logger.info(f"Length of latest GCN circular: {len(latest)}")
 
-        self.assertGreater(len(latest), 0)
+    #     self.assertGreater(len(latest), 0)
 
-    def test_ztf_plan(self):
+    # def test_ztf_plan(self):
 
-        self.logger.info("\n\n Testing ZTF Plan \n\n")
+    #     self.logger.info("\n\n Testing ZTF Plan \n\n")
 
-        name = "ZTF19accdntg"
-        date = "2021-07-22"
+    #     name = "ZTF19accdntg"
+    #     date = "2021-07-22"
 
-        plan = PlanObservation(name=name, date=date, alertsource="ZTF")
-        plan.plot_target()
-        plan.request_ztf_fields()
+    #     plan = PlanObservation(name=name, date=date, alertsource="ZTF")
+    #     plan.plot_target()
+    #     plan.request_ztf_fields()
 
-        plt.close()
+    #     plt.close()
 
-        recommended_field = plan.recommended_field
-        recommended_field_expected = None
+    #     recommended_field = plan.recommended_field
+    #     recommended_field_expected = None
 
-        self.assertEqual(recommended_field, recommended_field_expected)
+    #     self.assertEqual(recommended_field, recommended_field_expected)
 
-    def test_icecube_plan(self):
+    # def test_icecube_plan(self):
 
-        self.logger.info("\n\n Testing IceCube Plan \n\n")
+    #     self.logger.info("\n\n Testing IceCube Plan \n\n")
 
-        neutrino_name = "IC220624A"
-        date = "2022-06-24"
+    #     neutrino_name = "IC220624A"
+    #     date = "2022-06-24"
 
-        self.logger.info(f"Creating an observation plan for neutrino {neutrino_name}")
-        plan = PlanObservation(name=neutrino_name, date=date, alertsource="icecube")
-        plan.plot_target()
-        plan.request_ztf_fields()
+    #     self.logger.info(f"Creating an observation plan for neutrino {neutrino_name}")
+    #     plan = PlanObservation(name=neutrino_name, date=date, alertsource="icecube")
+    #     plan.plot_target()
+    #     plan.request_ztf_fields()
 
-        plt.close()
+    #     plt.close()
 
-        recommended_field = plan.recommended_field
-        recommended_field_expected = 720
+    #     recommended_field = plan.recommended_field
+    #     recommended_field_expected = 720
 
-        self.logger.info(
-            f"recommended field: {recommended_field}, expected {recommended_field_expected}"
-        )
-        self.assertEqual(recommended_field, recommended_field_expected)
+    #     self.logger.info(
+    #         f"recommended field: {recommended_field}, expected {recommended_field_expected}"
+    #     )
+    #     self.assertEqual(recommended_field, recommended_field_expected)
 
     def test_icecube_multiday_plan(self):
 
@@ -273,6 +273,12 @@ class TestPlan(unittest.TestCase):
         ]
 
         self.assertEqual(triggers_summary, triggers_summary_expected)
+
+        # first, make sure there are no leftovers on Kowalski
+        # try:
+        q.delete_queue()
+        # except:
+        # self.logger.info("Queue was probably already empty")
 
         q.submit_queue()
 

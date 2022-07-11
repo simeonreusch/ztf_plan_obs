@@ -52,33 +52,12 @@ class MultiDayObservation:
             first_obs_day = Time(
                 first_obs, format="iso", scale="utc", out_subfmt="date"
             )
-            next_days = [(first_obs_day + i - 1).value for i in NIGHTS]
+            next_days = [(first_obs_day + (i - 1) * u.d).value for i in NIGHTS]
         else:
             startdate_astropy = Time(
                 str(startdate), format="iso", scale="utc", out_subfmt="date"
             )
-            next_days = [(startdate_astropy + i - 1).value for i in NIGHTS]
-
-        # if startdate is None:
-        #     now_astropy = Time(str(now), format="iso", scale="utc", out_subfmt="date")
-        #     next_days = [(now_astropy + i - 1).value for i in NIGHTS]
-        # else:
-        #     startdate_astropy = Time(
-        #         str(startdate), format="iso", scale="utc", out_subfmt="date"
-        #     )
-        #     next_days = [(startdate_astropy + i - 1).value for i in NIGHTS]
-
-        # if self.ra is None:
-        #     plan_initial = PlanObservation(
-        #         name=name, date=str(today), alertsource="icecube"
-        #     )
-        # else:
-        #     plan_initial = PlanObservation(
-        #         name=name, date=str(today), ra=self.ra, dec=self.dec
-        #     )
-
-        # print(plan_initial.g_band_recommended_time_start)
-        # quit()
+            next_days = [(startdate_astropy + (i - 1) * u.d).value for i in NIGHTS]
 
         ra = plan_initial.ra
         dec = plan_initial.dec

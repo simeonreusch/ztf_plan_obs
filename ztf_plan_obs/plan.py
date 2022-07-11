@@ -214,7 +214,8 @@ class PlanObservation:
         in_night = True means it's currently dark at the site
         and morning comes before evening.
         """
-        if self.twilight_evening - self.twilight_morning > 0:
+
+        if self.twilight_evening.mjd - self.twilight_morning.mjd > 0:
             self.in_night = True
         else:
             self.in_night = False
