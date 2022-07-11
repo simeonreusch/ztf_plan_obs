@@ -147,9 +147,22 @@ class Queue:
         """
         Delete all triggers of the queue that have been submitted to Kowalski
         """
+        results = {}
+
         for i, trigger in self.queue.items():
             req = {"user": self.user, "queue_name": trigger["queue_name"]}
-            self.kowalski.api(method="delete", endpoint="/api/triggers/ztf", data=req)
+            res = self.kowalski.api(
+                method="delete", endpoint="/api/triggers/ztf", data=req
+            )
+            print(res)
+            results.update({i: res})
+
+        for i, trigger in self.queue.items():
+            res = results[i]
+            if res["status"] != "success":
+                err = f"something went wrong with deleting the trigger ({trigger['queue_name']})"
+
+                raise APIError(err)
 
     def delete_trigger(self, trigger_name) -> None:
         """
