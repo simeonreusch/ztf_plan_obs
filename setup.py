@@ -1,14 +1,14 @@
 DESCRIPTION = "Plan observations with the Zwicky Transient Facility"
 LONG_DESCRIPTION = """Plan observations with the Zwicky Transient Facility. Automated parsing of GCN is only implemented for IceCube at the moment."""
 
-DISTNAME = "ztf_plan_obs"
+DISTNAME = "planobs"
 AUTHOR = "Simeon Reusch"
 MAINTAINER = "Simeon Reusch"
 MAINTAINER_EMAIL = "simeon.reusch@desy.de"
-URL = "https://github.com/simeonreusch/ztf_plan_obs/"
+URL = "https://github.com/simeonreusch/planobs/"
 LICENSE = "BSD (3-clause)"
-DOWNLOAD_URL = "https://github.com/simeonreusch/ztf_plan_obs/archive/v0.34.tar.gz"
-VERSION = "0.34"
+DOWNLOAD_URL = "https://github.com/simeonreusch/planobs/archive/v0.35.tar.gz"
+VERSION = "0.35"
 
 try:
     from setuptools import setup, find_packages
