@@ -36,6 +36,7 @@ if __name__ == "__main__":
         "html5lib",
         "shapely",
         "geopandas",
+        "tqdm",
     ]
 
     setup(

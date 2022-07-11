@@ -3,11 +3,13 @@
 # GCN parsing code partially by Robert Stein (robert.stein@desy.de)
 # License: BSD-3-Clause
 
-import os, time, re
+import os, time, re, logging
 import numpy as np
 import pandas as pd
 from astropy.time import Time
 import requests
+
+logger = logging.getLogger(__name__)
 
 
 def get_gcn_circulars_archive(archive_no=None):
@@ -35,7 +37,7 @@ def get_gcn_circulars_archive(archive_no=None):
             _archive_numbers.append(_archive_no)
 
     if archive_no is not None:
-        print(f"Processed archive number {archive_no}")
+        logger.info(f"Processed archive number {archive_no}")
 
     return gcns, max(_archive_numbers)
 
@@ -110,14 +112,18 @@ def parse_radec(str: str):
     else:
         raise ParsingError(f"Could not parse GCN ra and dec")
 
+    logger.debug(pos, pos_upper, pos_lower)
+
     return pos, pos_upper, pos_lower
 
 
 def parse_latest_gcn_notice():
     """ """
     url = "https://gcn.gsfc.nasa.gov/amon_icecube_gold_bronze_events.html"
+
     response = requests.get(url)
     table = pd.read_html(response.text)[0]
+
     latest = table.head(1)
     revision = latest["EVENT"]["Rev"][0]
     date = latest["EVENT"]["Date"][0].replace("/", "-")
@@ -125,6 +131,9 @@ def parse_latest_gcn_notice():
     ra = latest["OBSERVATION"]["RA [deg]"][0]
     dec = latest["OBSERVATION"]["Dec [deg]"][0]
     arrivaltime = Time(f"20{date} {obstime}")
+
+    logger.debug(ra, dec, arrivaltime, revision)
+
     return ra, dec, arrivaltime, revision
 
 
