@@ -31,7 +31,7 @@ if __name__ == "__main__":
         "penquins",
         "matplotlib",
         "flask",
-        "ztfquery>=1.15.7",
+        "ztfquery==1.18.2",
         "lxml",
         "html5lib",
         "shapely",
